@@ -1,0 +1,2154 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>รายจ่ายรายเดือน</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap');
+
+:root{
+  --paper:#F8F0E1;
+  --paper-line:#E1CDA6;
+  --paper-line-soft:#EFE4CC;
+  --ink:#4B3524;
+  --ink-soft:#8D7358;
+  --pine:#8B5E3C;
+  --pine-soft:#D9BE97;
+  --clay:#A6683F;
+  --amber:#E8C48C;
+  --teal:#9BC2B0;
+  --grey:#B3A38C;
+  --danger:#C97B6B;
+  --card:#F1E4CB;
+}
+*{box-sizing:border-box;}
+body{margin:0;}
+#app{
+  font-family:'IBM Plex Sans Thai', sans-serif;
+  background:var(--paper);
+  color:var(--ink);
+  min-height:100vh;
+  padding:56px 16px 0;
+}
+.wrap{max-width:520px;margin:0 auto;position:relative;}
+.page{padding-bottom:90px;}
+
+.hamburger-btn{position:fixed;top:14px;left:14px;z-index:15;background:var(--card);border:1px solid var(--paper-line);border-radius:8px;padding:7px;color:var(--pine);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.08);line-height:0;}
+.hamburger-btn:focus-visible{outline:2px solid var(--pine);outline-offset:2px;}
+.gear-btn{position:fixed;top:14px;right:14px;z-index:15;background:var(--card);border:1px solid var(--paper-line);border-radius:8px;padding:7px;color:var(--pine);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.08);line-height:0;}
+.gear-btn:focus-visible{outline:2px solid var(--pine);outline-offset:2px;}
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.35);opacity:0;pointer-events:none;transition:opacity .2s;z-index:20;}
+.drawer-overlay.open{opacity:1;pointer-events:auto;}
+.drawer{position:fixed;top:0;left:0;bottom:0;width:84%;max-width:360px;background:var(--paper);box-shadow:2px 0 14px rgba(0,0,0,0.18);transform:translateX(-100%);transition:transform .25s ease;z-index:21;overflow-y:auto;}
+.drawer.open{transform:translateX(0);}
+.drawer.right{left:auto;right:0;box-shadow:-2px 0 14px rgba(0,0,0,0.18);transform:translateX(100%);}
+.drawer.right.open{transform:translateX(0);}
+.drawer-inner{padding:20px 16px 40px;}
+.drawer-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.drawer-title{font-family:'Noto Serif Thai',serif;font-weight:700;font-size:20px;color:var(--pine);flex:1;}
+.drawer-close{background:none;border:none;font-size:24px;color:var(--ink-soft);cursor:pointer;padding:2px 8px;line-height:1;}
+.drawer-close:hover{color:var(--danger);}
+.theme-grid{display:flex;flex-wrap:wrap;gap:14px;margin:10px 0 4px;}
+.theme-swatch-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:none;cursor:pointer;padding:2px;font-family:inherit;}
+.theme-swatch{width:44px;height:44px;border-radius:50%;border:2px solid transparent;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.06);}
+.theme-swatch-wrap.active .theme-swatch{border-color:var(--ink);}
+.theme-swatch-wrap span{font-size:11px;color:var(--ink-soft);}
+.theme-swatch-wrap.active span{color:var(--ink);font-weight:600;}
+.settings-btn-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.settings-btn{border:1px solid var(--pine);background:none;color:var(--pine);font-family:inherit;font-size:13px;padding:7px 14px;border-radius:20px;cursor:pointer;}
+.settings-btn:hover{background:var(--paper-line-soft);}
+.settings-file-label{display:inline-block;border:1px solid var(--pine-soft);background:none;color:var(--pine);font-family:inherit;font-size:13px;padding:7px 14px;border-radius:20px;cursor:pointer;}
+.settings-file-label:hover{background:var(--paper-line-soft);}
+.settings-menu{margin-top:12px;border-top:1px solid var(--paper-line);}
+.settings-menu-row{width:100%;display:flex;justify-content:space-between;align-items:center;background:none;border:none;border-bottom:1px solid var(--paper-line);padding:16px 4px;font-family:'Noto Serif Thai',serif;font-size:16px;color:var(--ink);cursor:pointer;text-align:left;}
+.settings-menu-row:hover{background:var(--paper-line-soft);}
+.settings-menu-chevron{color:var(--grey);font-size:20px;}
+.drawer-back{background:none;border:none;font-size:24px;color:var(--pine);cursor:pointer;padding:2px 8px 2px 0;line-height:1;}
+.drawer-back:hover{color:var(--clay);}
+.drawer-tabs{display:flex;gap:8px;flex:1;}
+.drawer-tab-btn{font-family:'Noto Serif Thai',serif;font-weight:700;font-size:19px;background:none;border:none;color:var(--grey);padding:2px 0 6px;cursor:pointer;border-bottom:3px solid transparent;}
+.drawer-tab-btn.active{color:var(--pine);border-bottom-color:var(--pine);}
+.drawer-tab-btn:focus-visible{outline:2px solid var(--pine);outline-offset:2px;}
+
+.page-title{font-family:'Noto Serif Thai',serif;font-weight:700;font-size:24px;color:var(--pine);margin:0 0 16px;}
+
+.month-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.month-nav button{background:none;border:none;color:var(--pine);font-size:22px;line-height:1;padding:6px 10px;cursor:pointer;border-radius:6px;}
+.month-nav button:hover{background:var(--paper-line-soft);}
+.month-nav button:focus-visible{outline:2px solid var(--pine);outline-offset:2px;}
+.month-title{font-family:'Noto Serif Thai',serif;font-weight:700;font-size:26px;color:var(--pine);text-align:center;}
+
+.summary{margin:18px 0 22px;padding:14px 0;border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);}
+.summary-row{display:flex;justify-content:space-between;align-items:baseline;padding:4px 2px;font-size:14px;color:var(--ink-soft);}
+.summary-row.total{font-size:19px;color:var(--ink);font-weight:600;padding-top:8px;margin-top:4px;border-top:1px solid var(--paper-line);}
+.summary-row .num{font-variant-numeric:tabular-nums;}
+
+.section{margin-bottom:30px;}
+.section h2{font-family:'Noto Serif Thai',serif;font-size:17px;font-weight:600;color:var(--pine);margin:0 0 2px;}
+.section .hint{font-size:12.5px;color:var(--ink-soft);margin:0 0 12px;}
+
+.row{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--paper-line);}
+.row input[type=text]{flex:1.4;min-width:0;border:none;background:none;font-family:inherit;font-size:15px;color:var(--ink);padding:4px 2px;}
+.row input[type=text]:focus{outline:none;border-bottom:1px solid var(--pine);}
+.row .amount-wrap{display:flex;align-items:center;gap:2px;color:var(--ink-soft);flex-shrink:0;}
+.row input[type=number]{width:70px;border:none;background:none;text-align:right;font-family:inherit;font-size:15px;color:var(--clay);font-variant-numeric:tabular-nums;padding:4px 2px;-moz-appearance:textfield;}
+.row input[type=number]::-webkit-outer-spin-button,.row input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.row input[type=number]:focus{outline:none;border-bottom:1px solid var(--pine);}
+.row .baht{font-size:13px;}
+.row .statusText{flex:1;min-width:0;border:none;border-bottom:1px solid transparent;background:none;font-family:inherit;font-size:13px;color:var(--teal);padding:4px 20px 4px 2px;text-align:left;-webkit-appearance:none;appearance:none;background-image:linear-gradient(45deg, transparent 50%, var(--ink-soft) 50%), linear-gradient(135deg, var(--ink-soft) 50%, transparent 50%);background-position:calc(100% - 12px) 55%, calc(100% - 7px) 55%;background-size:5px 5px, 5px 5px;background-repeat:no-repeat;}
+.row .statusText:focus{outline:none;border-bottom:1px solid var(--pine);}
+.del-btn{border:none;background:none;color:var(--ink-soft);font-size:17px;cursor:pointer;padding:4px 6px;flex-shrink:0;line-height:1;border-radius:4px;}
+.del-btn:hover{color:var(--danger);background:var(--paper-line-soft);}
+.del-btn:focus-visible{outline:2px solid var(--pine);outline-offset:1px;}
+
+.add-row{display:flex;align-items:center;gap:8px;padding-top:12px;flex-wrap:wrap;}
+.add-row input[type=text]{flex:1.4;min-width:90px;border:none;border-bottom:1px dashed var(--paper-line);background:none;font-family:inherit;font-size:14.5px;color:var(--ink);padding:6px 2px;}
+.add-row input[type=text]::placeholder{color:var(--grey);}
+.add-row input[type=text]:focus{outline:none;border-bottom:1px solid var(--pine);}
+.add-row input[type=number]{width:64px;border:none;border-bottom:1px dashed var(--paper-line);background:none;text-align:right;font-family:inherit;font-size:14.5px;color:var(--ink);padding:6px 2px;-moz-appearance:textfield;}
+.add-row input[type=number]::-webkit-outer-spin-button,.add-row input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.add-row input[type=number]:focus{outline:none;border-bottom:1px solid var(--pine);}
+.add-row .statusText{flex:1;min-width:80px;border:none;border-bottom:1px dashed var(--paper-line);background:none;font-family:inherit;font-size:13.5px;color:var(--ink);padding:6px 20px 6px 2px;-webkit-appearance:none;appearance:none;background-image:linear-gradient(45deg, transparent 50%, var(--ink-soft) 50%), linear-gradient(135deg, var(--ink-soft) 50%, transparent 50%);background-position:calc(100% - 10px) 55%, calc(100% - 5px) 55%;background-size:5px 5px, 5px 5px;background-repeat:no-repeat;}
+.add-row .statusText:focus{outline:none;border-bottom:1px solid var(--pine);}
+.add-btn{flex-shrink:0;border:1px solid var(--pine);background:var(--pine);color:var(--paper);font-family:inherit;font-size:13.5px;font-weight:500;padding:7px 14px;border-radius:20px;cursor:pointer;}
+.add-btn:hover{background:#6E4A2D;}
+.add-btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px;}
+
+.empty{color:var(--grey);font-size:13.5px;padding:10px 2px;font-style:italic;}
+.lowstock-box{background:#F5E8DC;border:1px solid var(--clay);border-radius:8px;padding:10px 12px;margin-bottom:12px;}
+.lowstock-title{font-family:'Noto Serif Thai',serif;font-size:12.5px;font-weight:600;color:var(--clay);margin-bottom:6px;}
+.lowstock-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(166,104,63,0.18);flex-wrap:wrap;}
+.lowstock-row:last-child{border-bottom:none;}
+.lowstock-name{font-size:13px;color:var(--ink);flex:1;min-width:0;}
+.lowstock-add{flex-shrink:0;border:1px solid var(--clay);background:none;color:var(--clay);font-family:inherit;font-size:11.5px;padding:4px 10px;border-radius:14px;cursor:pointer;}
+.lowstock-add:hover{background:var(--clay);color:var(--paper);}
+.status-msg{text-align:center;color:var(--ink-soft);font-size:13px;padding:30px 0;}
+.reset-link{display:block;text-align:center;margin-top:34px;color:var(--ink-soft);font-size:12px;text-decoration:underline;cursor:pointer;background:none;border:none;font-family:inherit;}
+
+.budget-set{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.budget-set label{font-size:14px;color:var(--ink-soft);flex-shrink:0;}
+.budget-set input[type=number]{flex:1;border:none;border-bottom:1px solid var(--paper-line);background:none;text-align:right;font-family:inherit;font-size:16px;color:var(--pine);font-weight:600;padding:6px 2px;-moz-appearance:textfield;}
+.budget-set input[type=number]::-webkit-outer-spin-button,.budget-set input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.budget-set input[type=number]:focus{outline:none;border-bottom:1px solid var(--pine);}
+.budget-set .baht{font-size:13px;color:var(--ink-soft);}
+
+.week-card{background:var(--card);border:1px solid var(--paper-line);border-radius:8px;padding:14px 16px;margin-bottom:12px;}
+.week-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px;}
+.week-head .wname{font-family:'Noto Serif Thai',serif;font-weight:600;font-size:15px;color:var(--ink);}
+.week-head .wbudget-set{font-size:12.5px;color:var(--ink-soft);display:flex;align-items:center;gap:3px;}
+.week-head .wbudget-set input{width:56px;border:none;border-bottom:1px dashed var(--paper-line);background:none;text-align:right;font-family:inherit;font-size:12.5px;color:var(--pine);font-weight:600;padding:2px;-moz-appearance:textfield;}
+.week-head .wbudget-set input::-webkit-outer-spin-button,.week-head .wbudget-set input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.week-head .wbudget-set input:focus{outline:none;border-bottom:1px solid var(--pine);}
+.week-remain{font-size:14px;font-weight:600;margin-bottom:10px;font-variant-numeric:tabular-nums;}
+.week-remain.ok{color:#6E9A82;}
+.week-remain.over{color:var(--danger);}
+.week-item-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--paper-line-soft);}
+.week-item-row input[type=text]{flex:1;min-width:0;border:none;background:none;font-family:inherit;font-size:13.5px;color:var(--ink);padding:3px 2px;}
+.week-item-row input[type=text]:focus{outline:none;border-bottom:1px solid var(--pine);}
+.week-item-row input[type=number]{width:60px;border:none;background:none;text-align:right;font-family:inherit;font-size:13.5px;color:var(--clay);padding:3px 2px;-moz-appearance:textfield;}
+.week-item-row input[type=number]::-webkit-outer-spin-button,.week-item-row input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.week-item-row input[type=number]:focus{outline:none;border-bottom:1px solid var(--pine);}
+.week-item-row .del-btn{font-size:15px;padding:2px 5px;}
+.week-add{display:flex;align-items:center;gap:6px;padding-top:8px;}
+.week-add input[type=text]{flex:1;min-width:0;border:none;border-bottom:1px dashed var(--paper-line);background:none;font-family:inherit;font-size:13px;padding:5px 2px;}
+.week-add input[type=text]:focus{outline:none;border-bottom:1px solid var(--pine);}
+.week-add input[type=number]{width:56px;border:none;border-bottom:1px dashed var(--paper-line);background:none;text-align:right;font-family:inherit;font-size:13px;padding:5px 2px;-moz-appearance:textfield;}
+.week-add input[type=number]::-webkit-outer-spin-button,.week-add input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.week-add input[type=number]:focus{outline:none;border-bottom:1px solid var(--pine);}
+.week-add button{flex-shrink:0;border:1px solid var(--pine-soft);background:none;color:var(--pine);font-family:inherit;font-size:12px;padding:5px 10px;border-radius:16px;cursor:pointer;}
+.week-add button:hover{background:var(--paper-line-soft);}
+
+.week-head .personName{flex:1;border:none;background:none;font-family:'Noto Serif Thai',serif;font-weight:600;font-size:15px;color:var(--ink);padding:2px;}
+.week-head .personName:focus{outline:none;border-bottom:1px solid var(--pine);}
+.snack-week-row{display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--paper-line-soft);flex-wrap:wrap;}
+.snack-week-row .swLabel{width:118px;border:none;background:none;font-family:inherit;font-size:13px;color:var(--ink);padding:3px 2px;}
+.snack-week-row .swLabel:focus{outline:none;border-bottom:1px solid var(--pine);}
+.snack-week-row .swAmount{width:56px;border:none;background:none;text-align:right;font-family:inherit;font-size:13.5px;color:var(--clay);padding:3px 2px;-moz-appearance:textfield;}
+.snack-week-row .swAmount::-webkit-outer-spin-button,.snack-week-row .swAmount::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.snack-week-row .swAmount:focus{outline:none;border-bottom:1px solid var(--pine);}
+.given-toggle{border:1px solid var(--paper-line);background:none;border-radius:14px;padding:4px 10px;font-family:inherit;font-size:11.5px;cursor:pointer;color:var(--ink-soft);white-space:nowrap;}
+.given-toggle.given{border-color:#6E9A82;color:#4F7B63;background:#E9F1EC;}
+.given-toggle.notgiven{border-color:var(--clay);color:var(--clay);background:#F5E8DC;}
+.given-toggle:focus-visible{outline:2px solid var(--pine);outline-offset:1px;}
+.snack-subhead{font-family:'Noto Serif Thai',serif;font-size:12.5px;font-weight:600;color:var(--clay);margin:12px 0 4px;padding-top:6px;border-top:1px dashed var(--paper-line);}
+.snack-subhead:first-of-type{border-top:none;padding-top:0;margin-top:2px;}
+
+.cmp-count-row{display:flex;align-items:center;gap:8px;margin:14px 0 16px;font-size:14px;color:var(--ink-soft);}
+.cmp-count-row select{border:none;border-bottom:1px solid var(--paper-line);background:none;font-family:inherit;font-size:15px;color:var(--pine);font-weight:600;padding:4px 8px;}
+.cmp-header-row{display:grid;grid-template-columns:1fr 78px 88px;gap:8px;font-size:11.5px;color:var(--ink-soft);padding:0 2px 4px;border-bottom:1px solid var(--paper-line);}
+.cmp-row{display:grid;grid-template-columns:1fr 78px 88px;gap:8px;padding:8px 0;border-bottom:1px solid var(--paper-line-soft);align-items:center;}
+.cmp-row input{border:none;background:none;font-family:inherit;font-size:14px;color:var(--ink);padding:4px 2px;min-width:0;}
+.cmp-row input[type=number]{text-align:right;color:var(--clay);-moz-appearance:textfield;}
+.cmp-row input[type=number]::-webkit-outer-spin-button,.cmp-row input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.cmp-row input:focus{outline:none;border-bottom:1px solid var(--pine);}
+.cmp-btn-row{display:flex;gap:10px;margin-top:16px;}
+.cmp-clear-btn{flex:1;border:1px solid var(--paper-line);background:var(--paper-line-soft);color:var(--ink-soft);font-family:inherit;font-size:14px;padding:10px;border-radius:10px;cursor:pointer;}
+.cmp-clear-btn:hover{background:var(--paper-line);}
+.cmp-calc-btn{flex:1;border:none;background:var(--pine);color:var(--paper);font-family:inherit;font-size:14px;font-weight:600;padding:10px;border-radius:10px;cursor:pointer;}
+.cmp-calc-btn:hover{background:#6E4A2D;}
+.cmp-result{background:var(--card);border:1px solid var(--paper-line);border-radius:10px;padding:14px 16px;margin-top:16px;}
+.cmp-result-title{font-family:'Noto Serif Thai',serif;font-weight:700;font-size:17px;color:var(--pine);margin-bottom:6px;}
+.cmp-result-best{font-size:14px;color:var(--ink);font-weight:600;margin-bottom:10px;}
+.cmp-compare-block{padding-top:8px;margin-top:8px;border-top:1px dashed var(--paper-line);}
+.cmp-compare-block:first-of-type{border-top:none;margin-top:0;padding-top:0;}
+
+.ov-card{cursor:pointer;}
+.ov-card:hover{background:#EDE1C8;}
+.ov-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.ov-card-head span:first-child{font-family:'Noto Serif Thai',serif;font-weight:600;font-size:16px;color:var(--pine);}
+.ov-card-arrow{color:var(--grey);font-size:22px;line-height:1;}
+
+.icon-manage-list{margin-top:10px;}
+.icon-manage-row{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid var(--paper-line-soft);}
+.icon-manage-icon{display:flex;color:var(--pine);flex-shrink:0;}
+.icon-manage-icon svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;}
+.icon-manage-label{flex:1;font-size:14px;color:var(--ink);}
+.icon-manage-controls{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.icon-move-btn{border:1px solid var(--paper-line);background:none;color:var(--pine);width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:14px;line-height:1;}
+.icon-move-btn:disabled{opacity:0.3;cursor:default;}
+.icon-move-btn:hover:not(:disabled){background:var(--paper-line-soft);}
+.icon-toggle{display:flex;align-items:center;margin-left:4px;}
+.icon-toggle input{width:19px;height:19px;accent-color:var(--pine);cursor:pointer;}
+
+.rent-hint{margin-bottom:10px;}
+.rent-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--paper-line);border-radius:8px;}
+.rent-table{border-collapse:collapse;min-width:820px;width:100%;}
+.rent-table.debt-table{min-width:720px;}
+.rent-table th, .rent-table td{padding:7px 6px;border-bottom:1px solid var(--paper-line);font-size:12px;white-space:nowrap;}
+.rent-table th{color:var(--pine);font-weight:600;text-align:right;background:var(--card);font-family:'Noto Serif Thai',serif;font-size:12.5px;}
+.rent-table th:first-child, .rent-table td:first-child{text-align:left;position:sticky;left:0;background:var(--card);z-index:1;}
+.rent-table td:first-child{background:var(--paper);}
+.rent-table tr:nth-child(even) td{background:#F3E8D4;}
+.rent-table tr:nth-child(even) td:first-child{background:#F3E8D4;}
+.rent-table input{width:64px;border:none;background:none;text-align:right;font-family:inherit;font-size:12px;color:var(--ink);padding:3px 2px;-moz-appearance:textfield;}
+.rent-table input[type=text]{width:58px;text-align:left;}
+.rent-table td:first-child input{width:52px;}
+.rent-table.debt-table td:first-child input{width:76px;}
+.rent-table input::-webkit-outer-spin-button,.rent-table input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.rent-table input:focus{outline:none;border-bottom:1px solid var(--pine);}
+.rent-table .diffcell{font-weight:600;color:var(--ink-soft);}
+.rent-table .diffcell.nz{color:var(--clay);}
+.rent-table .totalcell{color:var(--teal);font-weight:600;}
+.rent-table .rdel{border:none;background:none;color:var(--ink-soft);font-size:15px;cursor:pointer;padding:2px 6px;}
+.rent-table .rdel:hover{color:var(--danger);}
+.rent-totals{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-soft);padding:10px 2px 0;}
+.rent-totals .num{font-variant-numeric:tabular-nums;color:var(--ink);font-weight:600;}
+.rent-add-btn{margin-top:12px;border:1px solid var(--pine);background:none;color:var(--pine);font-family:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;}
+.rent-add-btn:hover{background:var(--paper-line-soft);}
+
+.tabbar{
+  position:fixed;left:0;right:0;bottom:0;
+  display:flex;justify-content:center;
+  background:var(--card);border-top:1px solid var(--paper-line);
+  padding:6px 0 max(6px, env(safe-area-inset-bottom));
+  z-index:10;
+}
+.tabbar-inner{display:flex;width:100%;max-width:520px;}
+.tab-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  background:none;border:none;cursor:pointer;padding:6px 4px 4px;
+  color:var(--grey);font-family:inherit;font-size:11px;
+}
+.tab-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+.tab-btn.active{color:var(--pine);}
+.tab-btn.active span{font-weight:600;}
+.tab-btn:focus-visible{outline:2px solid var(--pine);outline-offset:-2px;border-radius:8px;}
+</style>
+</head>
+<body>
+<div id="app"><div class="wrap"><div class="status-msg">กำลังโหลด…</div></div></div>
+
+<script>
+(function(){
+  const THAI_MONTHS = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+  const NUM_WEEKS = 4;
+  const STATUS_OPTIONS = ['จ่ายแล้ว','เก็บแล้ว','ซื้อแล้ว','รอลดราคา'];
+  const UNIT_OPTIONS = ['ชิ้น','ถุง','ขวด','กล่อง','แกลลอน','ลัง','แพ็ค','กระป๋อง','ห่อ','ม้วน'];
+
+  const ICON_WALLET = '<svg viewBox="0 0 24 24"><path d="M4 7.5v10A2.5 2.5 0 0 0 6.5 20h12a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1h-13A1.5 1.5 0 0 1 4 7.5Z"/><path d="M4 7.5A1.5 1.5 0 0 1 5.5 6H16"/><circle cx="16.2" cy="13.5" r="1"/></svg>';
+  const ICON_GRID = '<svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.3"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="1.3"/><rect x="3.5" y="13" width="7.5" height="7.5" rx="1.3"/><rect x="13" y="13" width="7.5" height="7.5" rx="1.3"/></svg>';
+  const ICON_DEBT = '<svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M8.5 8h7M8.5 11.5h7M8.5 15h4.5"/></svg>';
+  const ICON_CANDY = '<svg viewBox="0 0 24 24"><path d="M8.5 9.5h7a3 3 0 0 1 0 6h-7a3 3 0 0 1 0-6Z"/><path d="M8.5 10.2 4.5 7.5v9l4-2.7M15.5 10.2l4-2.7v9l-4-2.7"/></svg>';
+  const ICON_HOUSE = '<svg viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-9"/><path d="M10 20v-5h4v5"/></svg>';
+
+  const TAB_DEFS = [
+    {key:'overview', label:'ภาพรวม', icon:ICON_GRID},
+    {key:'expense', label:'ค่าใช้จ่าย', icon:ICON_WALLET},
+    {key:'debt', label:'หนี้สิน', icon:ICON_DEBT},
+    {key:'snack', label:'ค่าขนม', icon:ICON_CANDY},
+    {key:'rent', label:'ค่าเช่า', icon:ICON_HOUSE},
+  ];
+  const TAB_CONFIG_KEY = 'tab-config';
+  function defaultTabConfig(){ return TAB_DEFS.map(d=>({key:d.key, visible:true})); }
+  function normalizeTabConfig(cfg){
+    if(!Array.isArray(cfg)) return defaultTabConfig();
+    const validKeys = TAB_DEFS.map(d=>d.key);
+    let out = cfg.filter(c=>c && validKeys.includes(c.key)).map(c=>({key:c.key, visible: c.visible!==false}));
+    validKeys.forEach(k=>{
+      if(!out.find(c=>c.key===k)) out.push({key:k, visible:true});
+    });
+    if(out.filter(c=>c.visible).length===0) out.forEach(c=>c.visible=true);
+    return out;
+  }
+  let tabConfig = defaultTabConfig();
+  function loadTabConfig(){
+    try{
+      const raw = lsGet(TAB_CONFIG_KEY);
+      tabConfig = raw ? normalizeTabConfig(JSON.parse(raw)) : defaultTabConfig();
+    }catch(e){ tabConfig = defaultTabConfig(); }
+  }
+  function saveTabConfig(){
+    lsSet(TAB_CONFIG_KEY, JSON.stringify(tabConfig));
+  }
+
+  let currentView = 'overview';
+  let drawerOpen = false;
+  let drawerPanel = 'menu';
+  let settingsOpen = false;
+  let settingsPanel = 'menu';
+
+  const THEMES = {
+    creamBrown: {label:'ครีม-น้ำตาล', swatch:'#8B5E3C', vars:{
+      '--paper':'#F8F0E1','--paper-line':'#E1CDA6','--paper-line-soft':'#EFE4CC','--ink':'#4B3524','--ink-soft':'#8D7358',
+      '--pine':'#8B5E3C','--pine-soft':'#D9BE97','--clay':'#A6683F','--amber':'#E8C48C','--teal':'#9BC2B0','--grey':'#B3A38C','--danger':'#C97B6B','--card':'#F1E4CB'
+    }},
+    sageGreen: {label:'สนเขียว', swatch:'#4C6B4F', vars:{
+      '--paper':'#F1F3EA','--paper-line':'#CBD6BE','--paper-line-soft':'#E2E9D8','--ink':'#34402E','--ink-soft':'#75846A',
+      '--pine':'#4C6B4F','--pine-soft':'#A9C0A3','--clay':'#6B8768','--amber':'#D8C98C','--teal':'#8FB6A8','--grey':'#A7AE9B','--danger':'#B76B5A','--card':'#E7EBDE'
+    }},
+    dustyBlue: {label:'ฟ้าฝุ่น', swatch:'#4E6E82', vars:{
+      '--paper':'#EEF2F4','--paper-line':'#C4D2DA','--paper-line-soft':'#DEE7EB','--ink':'#2F3E46','--ink-soft':'#6E828C',
+      '--pine':'#4E6E82','--pine-soft':'#A9C1CE','--clay':'#7C93A3','--amber':'#D9C79C','--teal':'#93B8B0','--grey':'#9FAEB6','--danger':'#C07A6E','--card':'#E1E9EC'
+    }},
+    blushPink: {label:'ชมพูพาสเทล', swatch:'#A9647A', vars:{
+      '--paper':'#FBF0EF','--paper-line':'#EBCFD1','--paper-line-soft':'#F5E2E2','--ink':'#5A3A3F','--ink-soft':'#9C7A7E',
+      '--pine':'#A9647A','--pine-soft':'#E3B9C4','--clay':'#B87E80','--amber':'#EAC9A6','--teal':'#B7A6C4','--grey':'#C4ACAE','--danger':'#C25B5B','--card':'#F5E1E1'
+    }},
+    darkMode: {label:'มืด (Dark)', swatch:'#D8A85C', vars:{
+      '--paper':'#1E1A15','--paper-line':'#3C342A','--paper-line-soft':'#2C261F','--ink':'#EFE4D3','--ink-soft':'#B7A98F',
+      '--pine':'#D8A85C','--pine-soft':'#8A6F4E','--clay':'#E0A468','--amber':'#EFCB93','--teal':'#8FCBB0','--grey':'#8A8272','--danger':'#E0897A','--card':'#282219'
+    }}
+  };
+  const THEME_KEY = 'theme-choice';
+  let currentTheme = 'creamBrown';
+  function loadTheme(){
+    const t = lsGet(THEME_KEY);
+    currentTheme = (t && THEMES[t]) ? t : 'creamBrown';
+    applyTheme(currentTheme);
+  }
+  function applyTheme(name){
+    const theme = THEMES[name] || THEMES.creamBrown;
+    Object.keys(theme.vars).forEach(k=>{
+      document.documentElement.style.setProperty(k, theme.vars[k]);
+    });
+  }
+  function saveTheme(name){
+    currentTheme = name;
+    applyTheme(name);
+    lsSet(THEME_KEY, name);
+  }
+
+
+  function statusOptionsHtml(current){
+    const opts = ['<option value="">— สถานะ —</option>'];
+    STATUS_OPTIONS.forEach(s=>{
+      opts.push(`<option value="${escapeAttr(s)}" ${current===s?'selected':''}>${s}</option>`);
+    });
+    return opts.join('');
+  }
+  function unitOptionsHtml(current){
+    const opts = ['<option value="">— หน่วย —</option>'];
+    UNIT_OPTIONS.forEach(u=>{
+      opts.push(`<option value="${escapeAttr(u)}" ${current===u?'selected':''}>${u}</option>`);
+    });
+    return opts.join('');
+  }
+
+  const now = new Date();
+  let cursor = {y: now.getFullYear(), m: now.getMonth()};
+  let data = {items:[], monthlyBudget:0, weeks:[]};
+  let snackData = {people:[], others:[]};
+  let rentRows = [];
+  let debtRows = [];
+  let loading = true;
+
+  const root = document.querySelector('#app .wrap');
+  const fmtNum = n => (Number(n)||0).toLocaleString('th-TH');
+  const monthKey = () => `month:${cursor.y}-${String(cursor.m+1).padStart(2,'0')}`;
+  const snackKey = () => `snack:${cursor.y}-${String(cursor.m+1).padStart(2,'0')}`;
+  const RENT_KEY = 'rent-utilities';
+  const DEBT_KEY = 'debts';
+  const LOCK_KEY = 'locked-template';
+  const STOCK_KEY = 'stock-items';
+  const uid = () => Math.random().toString(36).slice(2,9);
+
+  function defaultData(){
+    return {
+      fixedItems: lockedTemplate.items.map(it=>({id:uid(), name:it.name, amount:it.amount, status:''})),
+      items: [],
+      monthlyBudget: lockedTemplate.monthlyBudget||0,
+      weeks: Array.from({length:NUM_WEEKS}, (_,i)=>({id:uid(), budget:(lockedTemplate.weekBudgets[i]||0), items:[]}))
+    };
+  }
+  function normalize(d){
+    if(!d) return defaultData();
+    if(!Array.isArray(d.fixedItems)) d.fixedItems = [];
+    if(!Array.isArray(d.items)) d.items = [];
+    if(typeof d.monthlyBudget !== 'number') d.monthlyBudget = 0;
+    if(!Array.isArray(d.weeks) || d.weeks.length===0){
+      d.weeks = Array.from({length:NUM_WEEKS}, ()=>({id:uid(), budget:0, items:[]}));
+    }
+    d.weeks.forEach(w=>{
+      if(!Array.isArray(w.items)) w.items=[];
+      if(typeof w.budget !== 'number') w.budget = 0;
+    });
+    d.fixedItems.forEach(it=>{ if(typeof it.amount!=='number') it.amount=0; if(typeof it.name!=='string') it.name=''; if(typeof it.status!=='string') it.status=''; });
+    return d;
+  }
+
+  function defaultSnack(){
+    const weekDefs = computeMonthWeeks(cursor.y, cursor.m);
+    return {
+      people: lockedTemplate.snackPeople.map(sp=>({
+        id:uid(), name:sp.name,
+        weeks: weekDefs.map(wd=>({id:uid(), label:wd.label, amount:sp.weeklyAmount||0, given:false}))
+      })),
+      others: []
+    };
+  }
+  function normalizeSnack(d){
+    if(!d) return defaultSnack();
+    if(!Array.isArray(d.people)) d.people = [];
+    if(!Array.isArray(d.others)) d.others = [];
+    d.others.forEach(it=>{ if(typeof it.status!=='string') it.status=''; });
+    d.people.forEach(p=>{
+      if(!Array.isArray(p.weeks)) p.weeks = [];
+      p.weeks.forEach(w=>{
+        if(typeof w.amount !== 'number') w.amount = 0;
+        if(typeof w.given !== 'boolean') w.given = false;
+        if(typeof w.label !== 'string') w.label = '';
+      });
+    });
+    return d;
+  }
+  function pad2(n){ return String(n).padStart(2,'0'); }
+  function mondayOnOrBefore(date){
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = (day===0) ? 6 : (day-1);
+    d.setDate(d.getDate()-diff);
+    return d;
+  }
+  function computeMonthWeeks(y, mIndex){
+    const firstOfMonth = new Date(y, mIndex, 1);
+    const lastOfMonth = new Date(y, mIndex+1, 0);
+    let weekStart = mondayOnOrBefore(firstOfMonth);
+    const weeks = [];
+    let n = 1;
+    while(weekStart <= lastOfMonth){
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate()+4);
+      weeks.push({n, label:`Week${n} (${pad2(weekStart.getDate())}-${pad2(weekEnd.getDate())})`});
+      n++;
+      weekStart = new Date(weekStart);
+      weekStart.setDate(weekStart.getDate()+7);
+    }
+    return weeks;
+  }
+
+  function defaultSnackPerson(){
+    const weekDefs = computeMonthWeeks(cursor.y, cursor.m);
+    return {id:uid(), name:'', weeks: weekDefs.map(wd=>defaultSnackWeek(wd.n, wd.label))};
+  }
+  function defaultSnackWeek(n, label){ return {id:uid(), label: label || `Week${n}`, amount:0, given:false}; }
+
+  function defaultRentRow(){
+    return {id:uid(), label:'', payDate:'', rent:0, water:0, waterRate:0, electric:0, electricRate:0, actualPaid:0};
+  }
+  function defaultDebtRow(){
+    return {id:uid(), label:'', total:0, payments:[]};
+  }
+  function defaultDebtPayment(){ return {id:uid(), month:'', amount:0}; }
+  function normalizeDebtRow(r){
+    if(typeof r.total !== 'number') r.total = 0;
+    if(!Array.isArray(r.payments)){
+      r.payments = [];
+      if(typeof r.paid === 'number' && r.paid>0){
+        r.payments.push({id:uid(), month:'ยอดที่จ่ายไปก่อนหน้า', amount:r.paid});
+      }
+    }
+    r.payments.forEach(p=>{
+      if(typeof p.amount !== 'number') p.amount = 0;
+      if(typeof p.month !== 'string') p.month = '';
+    });
+    return r;
+  }
+
+  function monthsToPayoff(remain, rate){
+    if(!rate || rate<=0) return null;
+    if(remain<=0) return 0;
+    return Math.ceil(remain/rate);
+  }
+  function payoffLabel(remain, rate){
+    const months = monthsToPayoff(remain, rate);
+    if(months===null) return '—';
+    if(months===0) return 'หมดแล้ว';
+    const now = new Date();
+    const target = new Date(now.getFullYear(), now.getMonth()+months, 1);
+    return `${THAI_MONTHS[target.getMonth()]} ${target.getFullYear()+543}`;
+  }
+
+  const LS_PREFIX = 'expense-tracker:';
+  function lsGet(key){
+    try{ return localStorage.getItem(LS_PREFIX+key); }
+    catch(e){ console.error('localStorage get failed', e); return null; }
+  }
+  function lsSet(key, value){
+    try{ localStorage.setItem(LS_PREFIX+key, value); }
+    catch(e){ console.error('localStorage set failed', e); }
+  }
+
+  async function loadRent(){
+    try{
+      const raw = lsGet(RENT_KEY);
+      rentRows = raw ? JSON.parse(raw) : [];
+      if(!Array.isArray(rentRows)) rentRows = [];
+    }catch(e){ rentRows = []; }
+  }
+  function saveRent(){
+    lsSet(RENT_KEY, JSON.stringify(rentRows));
+  }
+
+  async function loadDebts(){
+    try{
+      const raw = lsGet(DEBT_KEY);
+      debtRows = raw ? JSON.parse(raw) : [];
+      if(!Array.isArray(debtRows)) debtRows = [];
+      debtRows.forEach(normalizeDebtRow);
+    }catch(e){ debtRows = []; }
+  }
+  function saveDebts(){
+    lsSet(DEBT_KEY, JSON.stringify(debtRows));
+  }
+
+  let stockRows = [];
+  function defaultStockRow(){ return {id:uid(), name:'', qty:0, unit:''}; }
+  function normalizeStock(rows){
+    if(!Array.isArray(rows)) return [];
+    rows.forEach(r=>{
+      if(typeof r.qty !== 'number') r.qty = 0;
+      if(typeof r.name !== 'string') r.name = '';
+      if(typeof r.unit !== 'string') r.unit = '';
+    });
+    return rows;
+  }
+  async function loadStock(){
+    try{
+      const raw = lsGet(STOCK_KEY);
+      stockRows = raw ? normalizeStock(JSON.parse(raw)) : [];
+    }catch(e){ stockRows = []; }
+  }
+  function saveStock(){
+    lsSet(STOCK_KEY, JSON.stringify(stockRows));
+  }
+
+  function defaultLockedTemplate(){
+    return {income:[], items:[], monthlyBudget:0, weekBudgets:Array(NUM_WEEKS).fill(0), snackPeople:[]};
+  }
+  function normalizeLocked(d){
+    if(!d) return defaultLockedTemplate();
+    if(!Array.isArray(d.income)) d.income = [];
+    if(!Array.isArray(d.items)) d.items = [];
+    if(typeof d.monthlyBudget !== 'number') d.monthlyBudget = 0;
+    if(!Array.isArray(d.weekBudgets)) d.weekBudgets = Array(NUM_WEEKS).fill(0);
+    while(d.weekBudgets.length < NUM_WEEKS) d.weekBudgets.push(0);
+    if(!Array.isArray(d.snackPeople)) d.snackPeople = [];
+    d.income.forEach(it=>{ if(typeof it.amount!=='number') it.amount=0; if(typeof it.name!=='string') it.name=''; });
+    d.items.forEach(it=>{ if(typeof it.amount!=='number') it.amount=0; if(typeof it.name!=='string') it.name=''; });
+    d.snackPeople.forEach(sp=>{ if(typeof sp.weeklyAmount!=='number') sp.weeklyAmount=0; if(typeof sp.name!=='string') sp.name=''; });
+    return d;
+  }
+  let lockedTemplate = defaultLockedTemplate();
+  async function loadLocked(){
+    try{
+      const raw = lsGet(LOCK_KEY);
+      lockedTemplate = raw ? normalizeLocked(JSON.parse(raw)) : defaultLockedTemplate();
+    }catch(e){ lockedTemplate = defaultLockedTemplate(); }
+  }
+  function saveLocked(){
+    lsSet(LOCK_KEY, JSON.stringify(lockedTemplate));
+  }
+
+  async function loadMonth(){
+    loading = true; render();
+    try{
+      const raw = lsGet(monthKey());
+      data = raw ? normalize(JSON.parse(raw)) : defaultData();
+    }catch(e){ data = defaultData(); }
+    try{
+      const raw2 = lsGet(snackKey());
+      snackData = raw2 ? normalizeSnack(JSON.parse(raw2)) : defaultSnack();
+    }catch(e){ snackData = defaultSnack(); }
+    loading = false;
+    render();
+  }
+  function saveData(){
+    lsSet(monthKey(), JSON.stringify(data));
+  }
+  function saveSnack(){
+    lsSet(snackKey(), JSON.stringify(snackData));
+  }
+
+  function changeMonth(delta){
+    let m = cursor.m + delta, y = cursor.y;
+    if(m < 0){ m = 11; y -= 1; }
+    if(m > 11){ m = 0; y += 1; }
+    cursor = {y, m};
+    loadMonth();
+  }
+
+  function totals(){
+    const totalIncome = lockedTemplate.income.reduce((s,i)=>s+(Number(i.amount)||0),0);
+    const totalFixed = data.fixedItems.reduce((s,i)=>s+(Number(i.amount)||0),0);
+    const totalItems = data.items.reduce((s,i)=>s+(Number(i.amount)||0),0);
+    const totalWeekBudget = data.weeks.reduce((s,w)=>s+(Number(w.budget)||0),0);
+    const totalWeekSpent = data.weeks.reduce((s,w)=>s+w.items.reduce((s2,i)=>s2+(Number(i.amount)||0),0),0);
+    const monthRemain = (Number(data.monthlyBudget)||0) - totalWeekSpent;
+    const grand = totalFixed + totalItems + totalWeekSpent;
+    return {totalIncome, totalFixed, totalItems, totalWeekBudget, totalWeekSpent, monthRemain, grand, netRemain: totalIncome - grand};
+  }
+
+  function monthNavHtml(){
+    return `
+      <div class="month-nav">
+        <button id="prevM" aria-label="เดือนก่อนหน้า">‹</button>
+        <div class="month-title">${THAI_MONTHS[cursor.m]} ${cursor.y+543}</div>
+        <button id="nextM" aria-label="เดือนถัดไป">›</button>
+      </div>`;
+  }
+
+  function tabBarHtml(){
+    const tabs = tabConfig.filter(c=>c.visible).map(c=>TAB_DEFS.find(d=>d.key===c.key)).filter(Boolean);
+    const list = tabs.length>0 ? tabs : TAB_DEFS;
+    return `<div class="tabbar"><div class="tabbar-inner">${list.map(tb=>`
+      <button class="tab-btn ${currentView===tb.key?'active':''}" data-view="${tb.key}">
+        ${tb.icon}<span>${tb.label}</span>
+      </button>`).join('')}</div></div>`;
+  }
+
+  function chromeHtml(){
+    return `
+      <button class="hamburger-btn" id="hamburgerBtn" aria-label="เมนู">
+        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <button class="gear-btn" id="gearBtn" aria-label="ตั้งค่า">
+        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V19a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.96 17.3a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.04H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.65 6.96a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1.04-1.56V1a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15.04 2.65a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V7a1.7 1.7 0 0 0 1.56 1.04H21a2 2 0 1 1 0 4h-.09A1.7 1.7 0 0 0 19.4 13Z"/></svg>
+      </button>
+      <div class="drawer-overlay ${(drawerOpen||settingsOpen)?'open':''}" id="drawerOverlay"></div>
+      <div class="drawer ${drawerOpen?'open':''}" id="drawer">
+        ${drawerOpen ? drawerContentHtml() : ''}
+      </div>
+      <div class="drawer right ${settingsOpen?'open':''}" id="settingsDrawer">
+        ${settingsOpen ? settingsPanelHtml() : ''}
+      </div>
+    `;
+  }
+
+  function settingsMenuHtml(){
+    return `
+      <div class="drawer-inner">
+        <div class="drawer-head">
+          <span class="drawer-title">ตั้งค่า</span>
+          <button class="drawer-close" id="settingsClose" aria-label="ปิดเมนู">×</button>
+        </div>
+        <div class="settings-menu">
+          <button class="settings-menu-row" data-panel="custom">
+            <span>Custom</span>
+            <span class="settings-menu-chevron">›</span>
+          </button>
+          <button class="settings-menu-row" data-panel="login">
+            <span>Login</span>
+            <span class="settings-menu-chevron">›</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  function settingsCustomHtml(){
+    const themeSwatches = Object.keys(THEMES).map(key=>{
+      const t = THEMES[key];
+      const active = currentTheme===key;
+      return `
+        <button class="theme-swatch-wrap ${active?'active':''}" data-theme="${key}">
+          <span class="theme-swatch" style="background:${t.swatch};"></span>
+          <span>${t.label}</span>
+        </button>
+      `;
+    }).join('');
+
+    const iconRows = tabConfig.map((tc, idx)=>{
+      const def = TAB_DEFS.find(d=>d.key===tc.key);
+      if(!def) return '';
+      return `
+        <div class="icon-manage-row">
+          <span class="icon-manage-icon">${def.icon}</span>
+          <span class="icon-manage-label">${def.label}</span>
+          <div class="icon-manage-controls">
+            <button class="icon-move-btn" data-idx="${idx}" data-dir="up" ${idx===0?'disabled':''} aria-label="เลื่อนขึ้น">↑</button>
+            <button class="icon-move-btn" data-idx="${idx}" data-dir="down" ${idx===tabConfig.length-1?'disabled':''} aria-label="เลื่อนลง">↓</button>
+            <label class="icon-toggle">
+              <input type="checkbox" class="icon-visible-toggle" data-idx="${idx}" ${tc.visible?'checked':''} />
+            </label>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div class="drawer-inner">
+        <div class="drawer-head">
+          <button class="drawer-back" id="settingsBack" aria-label="กลับ">‹</button>
+          <span class="drawer-title">Custom</span>
+          <button class="drawer-close" id="settingsClose" aria-label="ปิดเมนู">×</button>
+        </div>
+
+        <div class="section">
+          <h2>Wallpaper</h2>
+          <p class="hint">เลือกโทนสีของโปรแกรม เปลี่ยนได้ตลอด</p>
+          <div class="theme-grid">${themeSwatches}</div>
+        </div>
+
+        <div class="section">
+          <h2>Icon</h2>
+          <p class="hint">ติ๊กเพื่อแสดง/ซ่อนไอคอนแถบล่าง และใช้ปุ่ม ↑↓ จัดลำดับ (ต้องเปิดไว้อย่างน้อย 1 อัน)</p>
+          <div class="icon-manage-list">${iconRows}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function settingsLoginHtml(){
+    return `
+      <div class="drawer-inner">
+        <div class="drawer-head">
+          <button class="drawer-back" id="settingsBack" aria-label="กลับ">‹</button>
+          <span class="drawer-title">Login</span>
+          <button class="drawer-close" id="settingsClose" aria-label="ปิดเมนู">×</button>
+        </div>
+        <p class="hint">ไฟล์นี้เป็นไฟล์เดี่ยวๆ ที่เก็บข้อมูลไว้ในเบราว์เซอร์ของเครื่องนี้เท่านั้น ยังไม่มีระบบ login เชื่อมบัญชีข้ามเครื่องแบบอัตโนมัติ — แต่สามารถ "ส่งออก" ข้อมูลเป็นไฟล์สำรอง แล้วไป "นำเข้า" ที่เครื่องใหม่แทนได้</p>
+        <div class="settings-btn-row">
+          <button class="settings-btn" id="exportDataBtn">ส่งออกข้อมูล (.json)</button>
+          <label class="settings-file-label" for="importDataInput">นำเข้าข้อมูล</label>
+          <input type="file" id="importDataInput" accept="application/json" style="display:none;" />
+        </div>
+      </div>
+    `;
+  }
+
+  function settingsPanelHtml(){
+    if(settingsPanel==='custom') return settingsCustomHtml();
+    if(settingsPanel==='login') return settingsLoginHtml();
+    return settingsMenuHtml();
+  }
+
+  function lockDataPanelHtml(){
+    const incomeHtml = lockedTemplate.income.length===0
+      ? '<div class="empty">ยังไม่มีรายการ</div>'
+      : lockedTemplate.income.map((it,idx)=>`
+        <div class="row">
+          <input type="text" class="lockIncomeName" data-idx="${idx}" value="${escapeAttr(it.name)}" />
+          <div class="amount-wrap">
+            <input type="number" class="lockIncomeAmount" data-idx="${idx}" value="${it.amount||''}" />
+            <span class="baht">บาท</span>
+          </div>
+          <button class="del-btn lockIncomeDel" data-idx="${idx}" aria-label="ลบ">×</button>
+        </div>
+      `).join('');
+
+    const itemsHtml = lockedTemplate.items.length===0
+      ? '<div class="empty">ยังไม่มีรายการ</div>'
+      : lockedTemplate.items.map((it,idx)=>`
+        <div class="row">
+          <input type="text" class="lockItemName" data-idx="${idx}" value="${escapeAttr(it.name)}" />
+          <div class="amount-wrap">
+            <input type="number" class="lockItemAmount" data-idx="${idx}" value="${it.amount||''}" />
+            <span class="baht">บาท</span>
+          </div>
+          <button class="del-btn lockItemDel" data-idx="${idx}" aria-label="ลบ">×</button>
+        </div>
+      `).join('');
+
+    const weekBudgetsHtml = Array.from({length:NUM_WEEKS},(_,i)=>`
+      <div class="row">
+        <span style="flex:1;font-size:14px;color:var(--ink-soft);">สัปดาห์ที่ ${i+1}</span>
+        <div class="amount-wrap">
+          <input type="number" class="lockWeekBudget" data-idx="${i}" value="${lockedTemplate.weekBudgets[i]||''}" />
+          <span class="baht">บาท</span>
+        </div>
+      </div>
+    `).join('');
+
+    const snackHtml = lockedTemplate.snackPeople.length===0
+      ? '<div class="empty">ยังไม่มีคน</div>'
+      : lockedTemplate.snackPeople.map((sp,idx)=>`
+        <div class="row">
+          <input type="text" class="lockSnackName" data-idx="${idx}" value="${escapeAttr(sp.name)}" placeholder="ชื่อคน" />
+          <div class="amount-wrap">
+            <input type="number" class="lockSnackAmount" data-idx="${idx}" value="${sp.weeklyAmount||''}" />
+            <span class="baht" style="font-size:11px;">บาท/สัปดาห์</span>
+          </div>
+          <button class="del-btn lockSnackDel" data-idx="${idx}" aria-label="ลบ">×</button>
+        </div>
+      `).join('');
+
+    return `
+        <p class="hint">ตั้งค่าตรงนี้ครั้งเดียว แล้วเดือนใหม่ๆ จะขึ้นให้อัตโนมัติโดยไม่ต้องตั้งใหม่ทุกเดือน</p>
+
+        <div class="section">
+          <h2>รายได้</h2>
+          <p class="hint">รายการนี้จะรวมเป็นยอด "รายได้" ที่หน้าค่าใช้จ่ายโดยตรงทุกเดือน (ไม่ต้องตั้งซ้ำในแต่ละเดือน)</p>
+          <div>${incomeHtml}</div>
+          <div class="add-row">
+            <input type="text" id="lockNewIncomeName" placeholder="ชื่อรายการ" />
+            <input type="number" id="lockNewIncomeAmount" placeholder="บาท" />
+            <button class="add-btn" id="lockAddIncome">เพิ่ม</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>Fix cost</h2>
+          <p class="hint">รายการที่จะขึ้นให้อัตโนมัติทุกเดือนในส่วน Fix cost</p>
+          <div>${itemsHtml}</div>
+          <div class="add-row">
+            <input type="text" id="lockNewItemName" placeholder="ชื่อรายการ" />
+            <input type="number" id="lockNewItemAmount" placeholder="บาท" />
+            <button class="add-btn" id="lockAddItem">เพิ่ม</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>งบเดือน (ค่าเริ่มต้น)</h2>
+          <div class="budget-set">
+            <label>งบทั้งเดือน</label>
+            <input type="number" id="lockMonthlyBudget" value="${lockedTemplate.monthlyBudget||''}" />
+            <span class="baht">บาท</span>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>งบรายสัปดาห์ (ค่าเริ่มต้น)</h2>
+          <div>${weekBudgetsHtml}</div>
+        </div>
+
+        <div class="section">
+          <h2>ค่าขนม — คนที่ให้ประจำ</h2>
+          <p class="hint">จำนวนบาท/สัปดาห์ที่จะขึ้นให้อัตโนมัติทุกสัปดาห์ของทุกเดือน</p>
+          <div>${snackHtml}</div>
+          <div class="add-row">
+            <input type="text" id="lockNewSnackName" placeholder="ชื่อคน" />
+            <input type="number" id="lockNewSnackAmount" placeholder="บาท/สัปดาห์" />
+            <button class="add-btn" id="lockAddSnack">เพิ่ม</button>
+          </div>
+        </div>
+
+        <button class="rent-add-btn" id="applyLockNow" style="width:100%;">ใช้เทมเพลตนี้กับเดือนที่เปิดอยู่ตอนนี้เลย</button>
+    `;
+  }
+
+  function stockPanelHtml(){
+    const rowsHtml = stockRows.length===0
+      ? '<div class="empty">ยังไม่มีของในสต็อก</div>'
+      : stockRows.map(r=>{
+        const low = (Number(r.qty)||0) <= LOW_STOCK_THRESHOLD;
+        return `
+        <div class="row" style="${low?'background:#F5E8DC;border-radius:6px;':''}">
+          <input type="text" class="stockName" data-id="${r.id}" value="${escapeAttr(r.name)}" placeholder="ชื่อของ" />
+          <div class="amount-wrap">
+            <input type="number" class="stockQty" data-id="${r.id}" value="${r.qty||''}" />
+            <select class="stockUnit" data-id="${r.id}" style="width:78px;border:none;background:none;font-family:inherit;font-size:12px;color:var(--ink-soft);padding:4px 2px;">${unitOptionsHtml(r.unit||'')}</select>
+          </div>
+          ${low ? '<span style="font-size:11px;color:var(--clay);white-space:nowrap;">(ใกล้หมดแล้ว)</span>' : ''}
+          <button class="del-btn stockDel" data-id="${r.id}" aria-label="ลบ">×</button>
+        </div>
+      `;}).join('');
+    return `
+        <p class="hint">รายการของที่มีอยู่แล้วในบ้าน (สต็อก) ไว้เช็คก่อนเพิ่มลง List ของที่ต้องซื้อ</p>
+        <div class="section">
+          <div>${rowsHtml}</div>
+          <div class="add-row">
+            <input type="text" id="newStockName" placeholder="ชื่อของ" />
+            <input type="number" id="newStockQty" placeholder="จำนวน" />
+            <select class="statusText" id="newStockUnit" style="min-width:70px;flex:0.7;">${unitOptionsHtml('')}</select>
+            <button class="add-btn" id="addStock">เพิ่ม</button>
+          </div>
+        </div>
+    `;
+  }
+
+  function drawerMenuHtml(){
+    return `
+      <div class="drawer-inner">
+        <div class="drawer-head">
+          <span class="drawer-title">เมนู</span>
+          <button class="drawer-close" id="drawerClose" aria-label="ปิดเมนู">×</button>
+        </div>
+        <div class="settings-menu">
+          <button class="settings-menu-row" data-panel="lock">
+            <span>Lock data</span>
+            <span class="settings-menu-chevron">›</span>
+          </button>
+          <button class="settings-menu-row" data-panel="stock">
+            <span>Stock</span>
+            <span class="settings-menu-chevron">›</span>
+          </button>
+          <button class="settings-menu-row" data-panel="compare">
+            <span>Compare</span>
+            <span class="settings-menu-chevron">›</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  function drawerContentHtml(){
+    if(drawerPanel==='menu') return drawerMenuHtml();
+    const titles = {lock:'Lock data', stock:'Stock', compare:'Compare'};
+    const bodies = {lock:lockDataPanelHtml, stock:stockPanelHtml, compare:comparePanelHtml};
+    return `
+      <div class="drawer-inner">
+        <div class="drawer-head">
+          <button class="drawer-back" id="drawerBack" aria-label="กลับ">‹</button>
+          <span class="drawer-title">${titles[drawerPanel]}</span>
+          <button class="drawer-close" id="drawerClose" aria-label="ปิดเมนู">×</button>
+        </div>
+        ${bodies[drawerPanel]()}
+      </div>
+    `;
+  }
+
+  function defaultCompareRow(n){ return {label:`แบบ ${n}`, price:0, qty:0}; }
+  let compareCount = 2;
+  let compareRows = [defaultCompareRow(1), defaultCompareRow(2)];
+  let compareResult = null;
+
+  function resizeCompareRows(n){
+    n = Math.max(2, Math.min(5, n));
+    compareCount = n;
+    if(compareRows.length < n){
+      while(compareRows.length < n) compareRows.push(defaultCompareRow(compareRows.length+1));
+    }else if(compareRows.length > n){
+      compareRows = compareRows.slice(0, n);
+    }
+    compareResult = null;
+  }
+
+  function computeCompare(){
+    const unitPrices = compareRows.map(r=>{
+      const price = Number(r.price)||0;
+      const qty = Number(r.qty)||0;
+      return qty>0 ? price/qty : null;
+    });
+    const valid = unitPrices.map((u,i)=>({u,i})).filter(x=>x.u!==null);
+    if(valid.length < 2){ compareResult = {error:true}; return; }
+    let best = valid[0];
+    valid.forEach(x=>{ if(x.u < best.u) best = x; });
+    const comparisons = valid.filter(x=>x.i!==best.i).map(x=>{
+      const diff = x.u - best.u;
+      const pct = x.u>0 ? (diff/x.u*100) : 0;
+      const refQty = Number(compareRows[best.i].qty)||0;
+      const savings = diff * refQty;
+      return {
+        otherLabel: compareRows[x.i].label,
+        diff, pct, refQty, savings
+      };
+    });
+    compareResult = {
+      error:false,
+      bestLabel: compareRows[best.i].label,
+      bestUnit: best.u,
+      comparisons
+    };
+  }
+
+  function comparePanelHtml(){
+    const countOptions = [2,3,4,5].map(n=>`<option value="${n}" ${compareCount===n?'selected':''}>${n}</option>`).join('');
+    const rowsHtml = compareRows.map((r,idx)=>`
+      <div class="cmp-row">
+        <input type="text" class="cmpLabel" data-idx="${idx}" value="${escapeAttr(r.label)}" />
+        <input type="number" class="cmpPrice" data-idx="${idx}" value="${r.price||''}" placeholder="ราคา" />
+        <input type="number" class="cmpQty" data-idx="${idx}" value="${r.qty||''}" placeholder="จำนวนหน่วย" />
+      </div>
+    `).join('');
+
+    let resultHtml = '';
+    if(compareResult){
+      if(compareResult.error){
+        resultHtml = `<div class="cmp-result"><div class="empty">กรอกราคาและจำนวนหน่วยให้ครบอย่างน้อย 2 แบบ (จำนวนหน่วยต้องมากกว่า 0)</div></div>`;
+      }else{
+        resultHtml = `
+          <div class="cmp-result">
+            <div class="cmp-result-title">สรุป</div>
+            <div class="cmp-result-best">${escapeAttr(compareResult.bestLabel)} คุ้มค่าที่สุด</div>
+            ${compareResult.comparisons.map(c=>`
+              <div class="cmp-compare-block">
+                <div class="summary-row"><span>ถูกกว่า ${escapeAttr(c.otherLabel)} หน่วยละ</span><span class="num">${c.diff.toFixed(4)} บาท</span></div>
+                <div class="summary-row"><span>หรือถูกกว่า</span><span class="num">${c.pct.toFixed(4)} %</span></div>
+                <div class="summary-row total"><span>ถ้าซื้อ ${fmtNum(c.refQty)} หน่วย จะประหยัด</span><span class="num">${c.savings.toFixed(2)} บาท</span></div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+    }
+
+    return `
+      <p class="hint">เครื่องมือเปรียบเทียบราคาต่อหน่วย ไม่บันทึกข้อมูลถาวร</p>
+      <div class="cmp-count-row">
+        <label>เปรียบเทียบราคา</label>
+        <select id="cmpCountSelect">${countOptions}</select>
+        <span>แบบ</span>
+      </div>
+      <div class="cmp-header-row">
+        <span></span><span>ราคา</span><span>จำนวนหน่วย</span>
+      </div>
+      <div id="cmpRowsWrap">${rowsHtml}</div>
+      <div class="cmp-btn-row">
+        <button class="cmp-clear-btn" id="cmpClearBtn">ล้าง</button>
+        <button class="cmp-calc-btn" id="cmpCalcBtn">คำนวณ</button>
+      </div>
+      <div id="cmpResultWrap">${resultHtml}</div>
+    `;
+  }
+
+  function overviewPageHtml(t){
+    const totalDebtRemain = debtRows.reduce((s,r)=>{
+      const paid = r.payments.reduce((s2,p)=>s2+(Number(p.amount)||0),0);
+      return s + ((Number(r.total)||0)-paid);
+    },0);
+
+    let snackGiven=0, snackRemain=0;
+    snackData.people.forEach(p=>p.weeks.forEach(w=>{
+      if(w.given) snackGiven += Number(w.amount)||0; else snackRemain += Number(w.amount)||0;
+    }));
+    const snackOthers = snackData.others.reduce((s,i)=>s+(Number(i.amount)||0),0);
+
+    const rentTotal = rentRows.reduce((s,r)=>s+((Number(r.rent)||0)+(Number(r.water)||0)+(Number(r.electric)||0)),0);
+
+    return `
+      <div class="page">
+        ${monthNavHtml()}
+        <div class="summary">
+          <div class="summary-row total"><span>คงเหลือสุทธิเดือนนี้</span><span class="num">${fmtNum(t.netRemain)} บาท</span></div>
+        </div>
+
+        <div class="week-card ov-card" data-view="expense">
+          <div class="ov-card-head"><span>ค่าใช้จ่าย</span><span class="ov-card-arrow">›</span></div>
+          <div class="summary-row"><span>รายได้</span><span class="num">${fmtNum(t.totalIncome)} บาท</span></div>
+          <div class="summary-row"><span>Fix cost + List</span><span class="num">${fmtNum(t.totalFixed+t.totalItems)} บาท</span></div>
+          <div class="summary-row"><span>งบรายสัปดาห์ใช้ไป</span><span class="num">${fmtNum(t.totalWeekSpent)} บาท</span></div>
+        </div>
+
+        <div class="week-card ov-card" data-view="debt">
+          <div class="ov-card-head"><span>หนี้สิน</span><span class="ov-card-arrow">›</span></div>
+          <div class="summary-row"><span>คงเหลือหนี้สินทั้งหมด</span><span class="num">${fmtNum(totalDebtRemain)} บาท</span></div>
+        </div>
+
+        <div class="week-card ov-card" data-view="snack">
+          <div class="ov-card-head"><span>ค่าขนม</span><span class="ov-card-arrow">›</span></div>
+          <div class="summary-row"><span>ให้แล้ว</span><span class="num">${fmtNum(snackGiven)} บาท</span></div>
+          <div class="summary-row"><span>คงเหลือ (ยังไม่ได้ให้)</span><span class="num">${fmtNum(snackRemain)} บาท</span></div>
+          <div class="summary-row"><span>ค่าใช้จ่ายอื่นๆ</span><span class="num">${fmtNum(snackOthers)} บาท</span></div>
+        </div>
+
+        <div class="week-card ov-card" data-view="rent">
+          <div class="ov-card-head"><span>ค่าเช่า + น้ำไฟ</span><span class="ov-card-arrow">›</span></div>
+          <div class="summary-row"><span>รวมทุกเดือน</span><span class="num">${fmtNum(rentTotal)} บาท</span></div>
+        </div>
+      </div>
+    `;
+  }
+
+  function expensePageHtml(t){
+    return `
+      <div class="page">
+        ${monthNavHtml()}
+        <div class="summary">
+          <div class="summary-row"><span>รายได้</span><span class="num">${fmtNum(t.totalIncome)} บาท</span></div>
+          <div class="summary-row"><span>Fix cost</span><span class="num">${fmtNum(t.totalFixed)} บาท</span></div>
+          <div class="summary-row"><span>List ของที่ต้องซื้อ</span><span class="num">${fmtNum(t.totalItems)} บาท</span></div>
+          <div class="summary-row"><span>รวมทั้งหมด</span><span class="num">${fmtNum(t.grand)} บาท</span></div>
+          <div class="summary-row total"><span>คงเหลือสุทธิ</span><span class="num">${fmtNum(t.netRemain)} บาท</span></div>
+        </div>
+
+        <div class="section" id="fixedSection">
+          <h2>Fix cost</h2>
+          <p class="hint">ค่าใช้จ่ายประจำที่ตายตัวทุกเดือน (ตั้งค่าเริ่มต้นได้ในเมนู Lock data)</p>
+          <div id="fixedList"></div>
+          <div class="add-row">
+            <input type="text" id="newFixedName" placeholder="ชื่อรายการ" />
+            <input type="number" id="newFixedAmount" placeholder="บาท" />
+            <select class="statusText" id="newFixedStatus">${statusOptionsHtml('')}</select>
+            <button class="add-btn" id="addFixed">เพิ่ม</button>
+          </div>
+        </div>
+
+        <div class="section" id="itemSection">
+          <h2>List ของที่ต้องซื้อ</h2>
+          <p class="hint">รายการ จำนวนเงิน และสถานะ</p>
+          <div id="lowStockBox"></div>
+          <div id="itemList"></div>
+          <div class="add-row">
+            <input type="text" id="newItemName" placeholder="ชื่อรายการ" />
+            <input type="number" id="newItemAmount" placeholder="บาท" />
+            <select class="statusText" id="newItemStatus">${statusOptionsHtml('')}</select>
+            <button class="add-btn" id="addItem">เพิ่ม</button>
+          </div>
+        </div>
+
+        <div class="section" id="monthBudgetSection">
+          <h2>ใช้จ่ายส่วนตัว</h2>
+          <p class="hint">ตั้งงบทั้งเดือนไว้ก่อน แล้วค่อยแบ่งลงไปเป็นงบรายสัปดาห์ด้านล่าง</p>
+          <div class="budget-set">
+            <label for="monthlyBudgetInput">งบทั้งเดือน</label>
+            <input type="number" id="monthlyBudgetInput" value="${data.monthlyBudget||''}" />
+            <span class="baht">บาท</span>
+          </div>
+          <div class="summary-row total"><span>เหลือทั้งเดือน</span><span class="num">${fmtNum(t.monthRemain)} บาท</span></div>
+        </div>
+
+        <div class="section" id="budgetSection">
+          <h2>งบรายสัปดาห์</h2>
+          <p class="hint">ใส่งบที่ใช้ได้ของแต่ละสัปดาห์ แล้วเพิ่มค่าใช้จ่ายเพื่อดูยอดคงเหลือ</p>
+          <div id="weekList"></div>
+        </div>
+
+        <button class="reset-link" id="resetMonth">ล้างข้อมูลเดือนนี้</button>
+      </div>
+    `;
+  }
+
+  function rentPageHtml(){
+    return `
+      <div class="page">
+        <div class="page-title">ค่าเช่าบ้าน + น้ำไฟ</div>
+        <div class="section" id="rentSection">
+          <p class="hint rent-hint">บันทึกต่อเนื่องทุกเดือน — เลื่อนซ้ายขวาเพื่อดูทุกช่อง</p>
+          <div class="rent-table-wrap">
+            <table class="rent-table">
+              <thead>
+                <tr>
+                  <th>รอบเดือน</th><th>วันที่จ่าย</th><th>ค่าเช่า</th><th>น้ำจ่าย</th><th>หน่วยละ</th><th>ไฟจ่าย</th><th>หน่วยละ</th><th>รวม</th><th>จ่ายจริง</th><th>diff</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="rentBody"></tbody>
+            </table>
+          </div>
+          <div class="rent-totals">
+            <span>รวมทุกเดือน</span>
+            <span class="num" id="rentTotalSum"></span>
+          </div>
+          <button class="rent-add-btn" id="addRentRow">+ เพิ่มเดือน</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function debtPageHtml(){
+    const totalRemain = debtRows.reduce((s,r)=>{
+      const paid = r.payments.reduce((s2,p)=>s2+(Number(p.amount)||0),0);
+      return s + ((Number(r.total)||0) - paid);
+    },0);
+    let overallMonths = -1, hasUnknown = false;
+    debtRows.forEach(r=>{
+      const paid = r.payments.reduce((s2,p)=>s2+(Number(p.amount)||0),0);
+      const remain = (Number(r.total)||0) - paid;
+      if(remain<=0) return;
+      const avg = r.payments.length>0 ? paid/r.payments.length : 0;
+      const m = monthsToPayoff(remain, avg);
+      if(m===null) hasUnknown = true;
+      else if(m>overallMonths) overallMonths = m;
+    });
+    let overallLabel = 'ยังไม่มีข้อมูลเพียงพอ';
+    if(debtRows.length>0 && totalRemain<=0) overallLabel = 'หมดแล้ว';
+    if(overallMonths>=0){
+      const now = new Date();
+      const target = new Date(now.getFullYear(), now.getMonth()+overallMonths, 1);
+      overallLabel = `${THAI_MONTHS[target.getMonth()]} ${target.getFullYear()+543}`;
+      if(hasUnknown) overallLabel += ' (บางก้อนยังไม่มีประวัติการจ่าย)';
+    }
+
+    return `
+      <div class="page">
+        <div class="page-title">หนี้สิน</div>
+        <div class="summary">
+          <div class="summary-row"><span>คงเหลือหนี้สินทั้งหมด</span><span class="num">${fmtNum(totalRemain)} บาท</span></div>
+          <div class="summary-row total"><span>คาดว่าจะปิดหนี้หมด</span><span class="num" style="font-size:15px;">${overallLabel}</span></div>
+        </div>
+        <div class="section" id="debtSection">
+          <p class="hint">แยกหนี้แต่ละก้อนออกเป็นรายเดือน ใส่ยอดที่จ่ายจริงของแต่ละเดือนได้ตามใจ ไม่ต้องเท่ากันทุกเดือน — ระบบจะประมาณวันหมดจากอัตราจ่ายเฉลี่ยที่ผ่านมา</p>
+          <div id="debtList"></div>
+          <button class="rent-add-btn" id="addDebtRow">+ เพิ่มหนี้สิน</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function snackPageHtml(){
+    let totalGiven=0, totalRemain=0;
+    snackData.people.forEach(p=>p.weeks.forEach(w=>{
+      if(w.given) totalGiven += Number(w.amount)||0;
+      else totalRemain += Number(w.amount)||0;
+    }));
+    const totalOthers = snackData.others.reduce((s,i)=>s+(Number(i.amount)||0),0);
+    return `
+      <div class="page">
+        ${monthNavHtml()}
+        <div class="summary">
+          <div class="summary-row"><span>ให้แล้ว (ค่าขนม)</span><span class="num">${fmtNum(totalGiven)} บาท</span></div>
+          <div class="summary-row"><span>ค่าใช้จ่ายอื่นๆ</span><span class="num">${fmtNum(totalOthers)} บาท</span></div>
+          <div class="summary-row total"><span>รวมที่ใช้ไปแล้ว</span><span class="num">${fmtNum(totalGiven+totalOthers)} บาท</span></div>
+          <div class="summary-row"><span>คงเหลือ (ยังไม่ได้ให้)</span><span class="num">${fmtNum(totalRemain)} บาท</span></div>
+        </div>
+        <div class="section" id="snackPeopleSection">
+          <h2>ค่าขนมรายสัปดาห์</h2>
+          <p class="hint">แบ่งเป็น 4 สัปดาห์ต่อคน กดปุ่มสถานะเพื่อสลับ "ให้แล้ว" / "ยังไม่ได้ให้"</p>
+          <div id="snackPeopleList"></div>
+          <button class="rent-add-btn" id="addSnackPerson">+ เพิ่มคน</button>
+        </div>
+        <div class="section" id="snackOtherSection">
+          <h2>ค่าใช้จ่ายอื่นๆ นอกเหนือจากค่าขนม</h2>
+          <p class="hint">รายจ่ายเบ็ดเตล็ดที่เกี่ยวกับค่าขนม แต่ไม่ใช่รายสัปดาห์ของใครคนใดคนหนึ่ง</p>
+          <div id="snackOtherList"></div>
+          <div class="add-row">
+            <input type="text" id="newOtherName" placeholder="ชื่อรายการ" />
+            <input type="number" id="newOtherAmount" placeholder="บาท" />
+            <select class="statusText" id="newOtherStatus">${statusOptionsHtml('')}</select>
+            <button class="add-btn" id="addOther">เพิ่ม</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function escapeAttr(s){
+    return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  }
+
+  function populateFixedList(){
+    const fixedList = root.querySelector('#fixedList');
+    if(!fixedList) return;
+    if(data.fixedItems.length===0){
+      fixedList.innerHTML = '<div class="empty">ยังไม่มีรายการ</div>';
+    }else{
+      fixedList.innerHTML = '';
+      data.fixedItems.forEach(item=>{
+        const row = document.createElement('div');
+        row.className='row';
+        row.innerHTML = `
+          <input type="text" value="${escapeAttr(item.name)}" data-id="${item.id}" class="fixedName" />
+          <div class="amount-wrap">
+            <input type="number" value="${item.amount||''}" data-id="${item.id}" class="fixedAmount" />
+            <span class="baht">บาท</span>
+          </div>
+          <select class="statusText fixedStatus" data-id="${item.id}">${statusOptionsHtml(item.status||'')}</select>
+          <button class="del-btn" data-id="${item.id}" aria-label="ลบรายการ">×</button>
+        `;
+        fixedList.appendChild(row);
+      });
+    }
+  }
+
+  const LOW_STOCK_THRESHOLD = 2;
+  function populateLowStockBox(){
+    const box = root.querySelector('#lowStockBox');
+    if(!box) return;
+    const low = stockRows.filter(r=>(Number(r.qty)||0) <= LOW_STOCK_THRESHOLD);
+    if(low.length===0){ box.innerHTML = ''; return; }
+    box.innerHTML = `
+      <div class="lowstock-box">
+        <div class="lowstock-title">ของใกล้หมด (เหลือ ≤ ${LOW_STOCK_THRESHOLD})</div>
+        ${low.map(r=>`
+          <div class="lowstock-row">
+            <span class="lowstock-name">${escapeAttr(r.name)} — เหลือ ${fmtNum(r.qty)} ${escapeAttr(r.unit)}</span>
+            <button class="lowstock-add" data-id="${r.id}">+ เพิ่มเข้า List</button>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  function populateItemList(){
+    const itemList = root.querySelector('#itemList');
+    if(!itemList) return;
+    if(data.items.length===0){
+      itemList.innerHTML = '<div class="empty">ยังไม่มีรายการ</div>';
+    }else{
+      itemList.innerHTML = '';
+      data.items.forEach(item=>{
+        const row = document.createElement('div');
+        row.className='row';
+        row.innerHTML = `
+          <input type="text" value="${escapeAttr(item.name)}" data-id="${item.id}" class="itemName" />
+          <div class="amount-wrap">
+            <input type="number" value="${item.amount||''}" data-id="${item.id}" class="itemAmount" />
+            <span class="baht">บาท</span>
+          </div>
+          <select class="statusText itemStatus" data-id="${item.id}">${statusOptionsHtml(item.status||'')}</select>
+          <button class="del-btn" data-id="${item.id}" aria-label="ลบรายการ">×</button>
+        `;
+        itemList.appendChild(row);
+      });
+    }
+  }
+
+  function populateWeekList(t){
+    const weekList = root.querySelector('#weekList');
+    if(!weekList) return;
+    weekList.innerHTML = '';
+    data.weeks.forEach((week, idx)=>{
+      const spent = week.items.reduce((s,i)=>s+(Number(i.amount)||0),0);
+      const remain = (Number(week.budget)||0) - spent;
+      const card = document.createElement('div');
+      card.className='week-card';
+      const itemsHtml = week.items.length===0
+        ? '<div class="empty">ยังไม่มีรายจ่าย</div>'
+        : week.items.map(it=>`
+          <div class="week-item-row">
+            <input type="text" value="${escapeAttr(it.name)}" data-wid="${week.id}" data-id="${it.id}" class="wItemName" />
+            <input type="number" value="${it.amount||''}" data-wid="${week.id}" data-id="${it.id}" class="wItemAmount" />
+            <span class="baht" style="font-size:12px;color:var(--ink-soft);">บาท</span>
+            <button class="del-btn" data-wid="${week.id}" data-id="${it.id}" aria-label="ลบรายการ">×</button>
+          </div>
+        `).join('');
+      card.innerHTML = `
+        <div class="week-head">
+          <span class="wname">สัปดาห์ที่ ${idx+1}</span>
+          <span class="wbudget-set">งบ <input type="number" class="wBudget" data-wid="${week.id}" value="${week.budget||''}" placeholder="0" /> บาท</span>
+        </div>
+        <div class="week-remain ${remain<0?'over':'ok'}">เหลือ ${fmtNum(remain)} บาท</div>
+        ${itemsHtml}
+        <div class="week-add">
+          <input type="text" class="wNewName" data-wid="${week.id}" placeholder="รายการ เช่น กิน" />
+          <input type="number" class="wNewAmount" data-wid="${week.id}" placeholder="บาท" />
+          <button class="wAddBtn" data-wid="${week.id}">เพิ่ม</button>
+        </div>
+      `;
+      weekList.appendChild(card);
+    });
+  }
+
+  function populateRentTable(){
+    const rentBody = root.querySelector('#rentBody');
+    if(!rentBody) return;
+    let grandTotal = 0, grandActual = 0;
+    if(rentRows.length===0){
+      rentBody.innerHTML = '<tr><td colspan="11" style="position:static;"><span class="empty">ยังไม่มีข้อมูล</span></td></tr>';
+    }else{
+      rentBody.innerHTML = '';
+      rentRows.forEach(r=>{
+        const total = (Number(r.rent)||0) + (Number(r.water)||0) + (Number(r.electric)||0);
+        const diff = (Number(r.actualPaid)||0) - total;
+        grandTotal += total; grandActual += (Number(r.actualPaid)||0);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input type="text" value="${escapeAttr(r.label)}" data-id="${r.id}" data-f="label" class="rentField" placeholder="ม.ค" /></td>
+          <td><input type="text" value="${escapeAttr(r.payDate)}" data-id="${r.id}" data-f="payDate" class="rentField" placeholder="dd.mm.yy" /></td>
+          <td><input type="number" value="${r.rent||''}" data-id="${r.id}" data-f="rent" class="rentField" /></td>
+          <td><input type="number" value="${r.water||''}" data-id="${r.id}" data-f="water" class="rentField" /></td>
+          <td><input type="number" value="${r.waterRate||''}" data-id="${r.id}" data-f="waterRate" class="rentField" /></td>
+          <td><input type="number" value="${r.electric||''}" data-id="${r.id}" data-f="electric" class="rentField" /></td>
+          <td><input type="number" value="${r.electricRate||''}" data-id="${r.id}" data-f="electricRate" class="rentField" /></td>
+          <td class="totalcell">${fmtNum(total)}</td>
+          <td><input type="number" value="${r.actualPaid||''}" data-id="${r.id}" data-f="actualPaid" class="rentField" /></td>
+          <td class="diffcell ${diff!==0?'nz':''}">${fmtNum(diff)}</td>
+          <td><button class="rdel" data-id="${r.id}" aria-label="ลบแถว">×</button></td>
+        `;
+        rentBody.appendChild(tr);
+      });
+    }
+    const rentTotalEl = root.querySelector('#rentTotalSum');
+    if(rentTotalEl) rentTotalEl.textContent = `${fmtNum(grandTotal)} บาท (จ่ายจริง ${fmtNum(grandActual)} บาท)`;
+  }
+
+  function populateDebtCards(){
+    const list = root.querySelector('#debtList');
+    if(!list) return;
+    if(debtRows.length===0){
+      list.innerHTML = '<div class="empty">ยังไม่มีรายการหนี้สิน</div>';
+      return;
+    }
+    list.innerHTML = '';
+    debtRows.forEach(d=>{
+      const paid = d.payments.reduce((s,p)=>s+(Number(p.amount)||0),0);
+      const remain = (Number(d.total)||0) - paid;
+      const avg = d.payments.length>0 ? paid/d.payments.length : 0;
+      const payoff = payoffLabel(remain, avg);
+      const paymentsHtml = d.payments.length===0
+        ? '<div class="empty">ยังไม่มีการจ่าย</div>'
+        : d.payments.map(p=>`
+          <div class="week-item-row">
+            <input type="text" class="dpMonth" data-did="${d.id}" data-id="${p.id}" value="${escapeAttr(p.month)}" placeholder="เดือน เช่น ก.ย." />
+            <input type="number" class="dpAmount" data-did="${d.id}" data-id="${p.id}" value="${p.amount||''}" />
+            <span class="baht" style="font-size:12px;color:var(--ink-soft);">บาท</span>
+            <button class="del-btn dpDel" data-did="${d.id}" data-id="${p.id}" aria-label="ลบรายการ">×</button>
+          </div>
+        `).join('');
+      const card = document.createElement('div');
+      card.className='week-card';
+      card.innerHTML = `
+        <div class="week-head">
+          <input type="text" class="debtName" data-did="${d.id}" value="${escapeAttr(d.label)}" placeholder="ชื่อหนี้" />
+          <button class="del-btn debtDel" data-did="${d.id}" aria-label="ลบหนี้">×</button>
+        </div>
+        <div class="budget-set" style="margin:8px 0 10px;">
+          <label>ยอดหนี้รวม</label>
+          <input type="number" class="debtTotal" data-did="${d.id}" value="${d.total||''}" />
+          <span class="baht">บาท</span>
+        </div>
+        <div class="summary-row"><span>จ่ายไปแล้ว</span><span class="num">${fmtNum(paid)} บาท</span></div>
+        <div class="summary-row"><span>คงเหลือ</span><span class="num">${fmtNum(remain)} บาท</span></div>
+        <div class="summary-row total"><span>คาดว่าจะหมด</span><span class="num" style="font-size:14px;">${payoff}</span></div>
+        <div class="snack-subhead">รายเดือนที่จ่าย</div>
+        ${paymentsHtml}
+        <div class="week-add">
+          <input type="text" class="dpNewMonth" data-did="${d.id}" placeholder="เดือน เช่น ก.ย." />
+          <input type="number" class="dpNewAmount" data-did="${d.id}" placeholder="บาท" />
+          <button class="dpAddBtn" data-did="${d.id}">เพิ่ม</button>
+        </div>
+      `;
+      list.appendChild(card);
+    });
+  }
+
+  function snackWeekRowHtml(p, w){
+    return `
+      <div class="snack-week-row">
+        <input type="text" class="swLabel" data-pid="${p.id}" data-id="${w.id}" value="${escapeAttr(w.label)}" />
+        <input type="number" class="swAmount" data-pid="${p.id}" data-id="${w.id}" value="${w.amount||''}" />
+        <span class="baht" style="font-size:12px;color:var(--ink-soft);">บาท</span>
+        <button class="given-toggle ${w.given?'given':'notgiven'}" data-pid="${p.id}" data-id="${w.id}">${w.given?'ให้แล้ว':'ยังไม่ได้ให้'}</button>
+      </div>
+    `;
+  }
+
+  function populateSnackPeople(){
+    const list = root.querySelector('#snackPeopleList');
+    if(!list) return;
+    if(snackData.people.length===0){
+      list.innerHTML = '<div class="empty">ยังไม่มีรายชื่อคน</div>';
+      return;
+    }
+    list.innerHTML = '';
+    snackData.people.forEach(p=>{
+      const givenWeeks = p.weeks.filter(w=>w.given);
+      const remainWeeks = p.weeks.filter(w=>!w.given);
+      const givenSum = givenWeeks.reduce((s,w)=>s+(Number(w.amount)||0),0);
+      const remainSum = remainWeeks.reduce((s,w)=>s+(Number(w.amount)||0),0);
+      const card = document.createElement('div');
+      card.className='week-card';
+      card.innerHTML = `
+        <div class="week-head">
+          <input type="text" class="personName" data-pid="${p.id}" value="${escapeAttr(p.name)}" placeholder="ชื่อคน" />
+          <button class="del-btn personDel" data-pid="${p.id}" aria-label="ลบคน">×</button>
+        </div>
+
+        <div class="snack-subhead">ให้แล้ว</div>
+        ${givenWeeks.length===0 ? '<div class="empty">ยังไม่มี</div>' : givenWeeks.map(w=>snackWeekRowHtml(p,w)).join('')}
+
+        <div class="snack-subhead">ยังไม่ได้ให้</div>
+        ${remainWeeks.length===0 ? '<div class="empty">ยังไม่มี</div>' : remainWeeks.map(w=>snackWeekRowHtml(p,w)).join('')}
+
+        <div class="snack-subhead">ยอดสรุป</div>
+        <div class="summary-row"><span>ให้แล้ว</span><span class="num">${fmtNum(givenSum)} บาท</span></div>
+        <div class="summary-row total"><span>คงเหลือ</span><span class="num">${fmtNum(remainSum)} บาท</span></div>
+      `;
+      list.appendChild(card);
+    });
+  }
+
+  function populateSnackOthers(){
+    const list = root.querySelector('#snackOtherList');
+    if(!list) return;
+    if(snackData.others.length===0){
+      list.innerHTML = '<div class="empty">ยังไม่มีรายการ</div>';
+    }else{
+      list.innerHTML = '';
+      snackData.others.forEach(item=>{
+        const row = document.createElement('div');
+        row.className='row';
+        row.innerHTML = `
+          <input type="text" value="${escapeAttr(item.name)}" data-id="${item.id}" class="otherName" />
+          <div class="amount-wrap">
+            <input type="number" value="${item.amount||''}" data-id="${item.id}" class="otherAmount" />
+            <span class="baht">บาท</span>
+          </div>
+          <select class="statusText otherStatus" data-id="${item.id}">${statusOptionsHtml(item.status||'')}</select>
+          <button class="del-btn otherDel" data-id="${item.id}" aria-label="ลบรายการ">×</button>
+        `;
+        list.appendChild(row);
+      });
+    }
+  }
+
+  function render(){
+    if(loading){ root.innerHTML = '<div class="status-msg">กำลังโหลด…</div>'; return; }
+    const t = totals();
+
+    let html = '';
+    if(currentView==='overview') html = overviewPageHtml(t);
+    else if(currentView==='expense') html = expensePageHtml(t);
+    else if(currentView==='debt') html = debtPageHtml();
+    else if(currentView==='snack') html = snackPageHtml();
+    else if(currentView==='rent') html = rentPageHtml();
+
+    root.innerHTML = html + tabBarHtml() + chromeHtml();
+
+    if(currentView==='expense'){
+      populateFixedList();
+      populateLowStockBox();
+      populateItemList();
+      populateWeekList(t);
+    }else if(currentView==='debt'){
+      populateDebtCards();
+    }else if(currentView==='snack'){
+      populateSnackPeople();
+      populateSnackOthers();
+    }else if(currentView==='rent'){
+      populateRentTable();
+    }
+
+    bindEvents();
+  }
+
+  function bindEvents(){
+    const hamburgerBtn = root.querySelector('#hamburgerBtn');
+    if(hamburgerBtn) hamburgerBtn.onclick = ()=>{ drawerOpen = true; drawerPanel = 'menu'; settingsOpen = false; render(); };
+    const gearBtn = root.querySelector('#gearBtn');
+    if(gearBtn) gearBtn.onclick = ()=>{ settingsOpen = true; settingsPanel = 'menu'; drawerOpen = false; render(); };
+    const drawerOverlay = root.querySelector('#drawerOverlay');
+    if(drawerOverlay) drawerOverlay.onclick = ()=>{ drawerOpen = false; settingsOpen = false; settingsPanel = 'menu'; render(); };
+
+    if(settingsOpen){
+      const settingsClose = root.querySelector('#settingsClose');
+      if(settingsClose) settingsClose.onclick = ()=>{ settingsOpen = false; settingsPanel = 'menu'; render(); };
+      const settingsBack = root.querySelector('#settingsBack');
+      if(settingsBack) settingsBack.onclick = ()=>{ settingsPanel = 'menu'; render(); };
+
+      root.querySelectorAll('.settings-menu-row').forEach(el=>{
+        el.onclick = ()=>{
+          settingsPanel = el.dataset.panel;
+          render();
+        };
+      });
+
+      root.querySelectorAll('.theme-swatch-wrap').forEach(el=>{
+        el.onclick = ()=>{
+          saveTheme(el.dataset.theme);
+          render();
+        };
+      });
+
+      root.querySelectorAll('.icon-move-btn').forEach(el=>{
+        el.onclick = e=>{
+          const idx = Number(e.currentTarget.dataset.idx);
+          const dir = e.currentTarget.dataset.dir;
+          const swapIdx = dir==='up' ? idx-1 : idx+1;
+          if(swapIdx<0 || swapIdx>=tabConfig.length) return;
+          const tmp = tabConfig[idx];
+          tabConfig[idx] = tabConfig[swapIdx];
+          tabConfig[swapIdx] = tmp;
+          saveTabConfig();
+          render();
+        };
+      });
+      root.querySelectorAll('.icon-visible-toggle').forEach(el=>{
+        el.onchange = e=>{
+          const idx = Number(e.target.dataset.idx);
+          const newVisible = e.target.checked;
+          const visibleCount = tabConfig.filter(t=>t.visible).length;
+          if(!newVisible && visibleCount<=1){
+            e.target.checked = true;
+            alert('ต้องเปิดไว้อย่างน้อย 1 ไอคอน');
+            return;
+          }
+          tabConfig[idx].visible = newVisible;
+          saveTabConfig();
+          if(!newVisible && currentView===tabConfig[idx].key){
+            const firstVisible = tabConfig.find(t=>t.visible);
+            if(firstVisible) currentView = firstVisible.key;
+          }
+          render();
+        };
+      });
+
+      const exportBtn = root.querySelector('#exportDataBtn');
+      if(exportBtn) exportBtn.onclick = ()=>{
+        const bundle = {};
+        for(let i=0;i<localStorage.length;i++){
+          const k = localStorage.key(i);
+          if(k && k.indexOf(LS_PREFIX)===0){
+            bundle[k.slice(LS_PREFIX.length)] = localStorage.getItem(k);
+          }
+        }
+        const blob = new Blob([JSON.stringify(bundle, null, 2)], {type:'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'expense-tracker-backup.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      };
+
+      const importInput = root.querySelector('#importDataInput');
+      if(importInput) importInput.onchange = e=>{
+        const file = e.target.files && e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = ev=>{
+          try{
+            const bundle = JSON.parse(ev.target.result);
+            Object.keys(bundle).forEach(k=>{
+              localStorage.setItem(LS_PREFIX+k, bundle[k]);
+            });
+            alert('นำเข้าข้อมูลสำเร็จ กำลังโหลดใหม่...');
+            settingsOpen = false;
+            init();
+          }catch(err){
+            alert('ไฟล์ไม่ถูกต้อง หรืออ่านไม่ได้');
+          }
+        };
+        reader.readAsText(file);
+      };
+    }
+
+    if(drawerOpen){
+      const drawerClose = root.querySelector('#drawerClose');
+      if(drawerClose) drawerClose.onclick = ()=>{ drawerOpen = false; drawerPanel = 'menu'; render(); };
+      const drawerBack = root.querySelector('#drawerBack');
+      if(drawerBack) drawerBack.onclick = ()=>{ drawerPanel = 'menu'; render(); };
+
+      root.querySelectorAll('#drawer .settings-menu-row').forEach(el=>{
+        el.onclick = ()=>{
+          drawerPanel = el.dataset.panel;
+          render();
+        };
+      });
+
+      if(drawerPanel==='compare'){
+        const cmpCountSelect = root.querySelector('#cmpCountSelect');
+        if(cmpCountSelect) cmpCountSelect.onchange = e=>{
+          resizeCompareRows(Number(e.target.value)||2);
+          render();
+        };
+        root.querySelectorAll('.cmpLabel').forEach(el=>{
+          el.onchange = e=>{
+            const idx = Number(e.target.dataset.idx);
+            if(compareRows[idx]){ compareRows[idx].label = e.target.value; compareResult = null; }
+          };
+        });
+        root.querySelectorAll('.cmpPrice').forEach(el=>{
+          el.onchange = e=>{
+            const idx = Number(e.target.dataset.idx);
+            if(compareRows[idx]){ compareRows[idx].price = Number(e.target.value)||0; compareResult = null; }
+          };
+        });
+        root.querySelectorAll('.cmpQty').forEach(el=>{
+          el.onchange = e=>{
+            const idx = Number(e.target.dataset.idx);
+            if(compareRows[idx]){ compareRows[idx].qty = Number(e.target.value)||0; compareResult = null; }
+          };
+        });
+        const cmpClearBtn = root.querySelector('#cmpClearBtn');
+        if(cmpClearBtn) cmpClearBtn.onclick = ()=>{
+          compareRows = compareRows.map((r,i)=>defaultCompareRow(i+1));
+          compareResult = null;
+          render();
+        };
+        const cmpCalcBtn = root.querySelector('#cmpCalcBtn');
+        if(cmpCalcBtn) cmpCalcBtn.onclick = ()=>{
+          computeCompare();
+          render();
+        };
+      }
+
+      if(drawerPanel==='stock'){
+        root.querySelectorAll('.stockName').forEach(el=>{
+          el.onchange = e=>{
+            const r = stockRows.find(r=>r.id===e.target.dataset.id);
+            if(r){ r.name = e.target.value; saveStock(); }
+          };
+        });
+        root.querySelectorAll('.stockQty').forEach(el=>{
+          el.onchange = e=>{
+            const r = stockRows.find(r=>r.id===e.target.dataset.id);
+            if(r){ r.qty = Number(e.target.value)||0; saveStock(); render(); }
+          };
+        });
+        root.querySelectorAll('.stockUnit').forEach(el=>{
+          el.onchange = e=>{
+            const r = stockRows.find(r=>r.id===e.target.dataset.id);
+            if(r){ r.unit = e.target.value; saveStock(); }
+          };
+        });
+        root.querySelectorAll('.stockDel').forEach(el=>{
+          el.onclick = e=>{
+            stockRows = stockRows.filter(r=>r.id!==e.currentTarget.dataset.id);
+            saveStock(); render();
+          };
+        });
+        const addStock = root.querySelector('#addStock');
+        if(addStock) addStock.onclick = ()=>{
+          const nameEl = root.querySelector('#newStockName');
+          const qtyEl = root.querySelector('#newStockQty');
+          const unitEl = root.querySelector('#newStockUnit');
+          const name = nameEl.value.trim();
+          if(!name) return;
+          stockRows.push({id:uid(), name, qty:Number(qtyEl.value)||0, unit:unitEl.value.trim()});
+          saveStock(); render();
+        };
+        return;
+      }
+
+      root.querySelectorAll('.lockIncomeName').forEach(el=>{
+        el.onchange = e=>{
+          lockedTemplate.income[Number(e.target.dataset.idx)].name = e.target.value;
+          saveLocked();
+        };
+      });
+      root.querySelectorAll('.lockIncomeAmount').forEach(el=>{
+        el.onchange = e=>{
+          lockedTemplate.income[Number(e.target.dataset.idx)].amount = Number(e.target.value)||0;
+          saveLocked(); render();
+        };
+      });
+      root.querySelectorAll('.lockIncomeDel').forEach(el=>{
+        el.onclick = e=>{
+          lockedTemplate.income.splice(Number(e.currentTarget.dataset.idx),1);
+          saveLocked(); render();
+        };
+      });
+      const lockAddIncome = root.querySelector('#lockAddIncome');
+      if(lockAddIncome) lockAddIncome.onclick = ()=>{
+        const nameEl = root.querySelector('#lockNewIncomeName');
+        const amtEl = root.querySelector('#lockNewIncomeAmount');
+        const name = nameEl.value.trim();
+        if(!name) return;
+        lockedTemplate.income.push({name, amount:Number(amtEl.value)||0});
+        saveLocked(); render();
+      };
+
+      root.querySelectorAll('.lockItemName').forEach(el=>{
+        el.onchange = e=>{
+          lockedTemplate.items[Number(e.target.dataset.idx)].name = e.target.value;
+          saveLocked();
+        };
+      });
+      root.querySelectorAll('.lockItemAmount').forEach(el=>{
+        el.onchange = e=>{
+          lockedTemplate.items[Number(e.target.dataset.idx)].amount = Number(e.target.value)||0;
+          saveLocked(); render();
+        };
+      });
+      root.querySelectorAll('.lockItemDel').forEach(el=>{
+        el.onclick = e=>{
+          lockedTemplate.items.splice(Number(e.currentTarget.dataset.idx),1);
+          saveLocked(); render();
+        };
+      });
+      const lockAddItem = root.querySelector('#lockAddItem');
+      if(lockAddItem) lockAddItem.onclick = ()=>{
+        const nameEl = root.querySelector('#lockNewItemName');
+        const amtEl = root.querySelector('#lockNewItemAmount');
+        const name = nameEl.value.trim();
+        if(!name) return;
+        lockedTemplate.items.push({name, amount:Number(amtEl.value)||0});
+        saveLocked(); render();
+      };
+
+      const lockMonthlyBudget = root.querySelector('#lockMonthlyBudget');
+      if(lockMonthlyBudget) lockMonthlyBudget.onchange = e=>{
+        lockedTemplate.monthlyBudget = Number(e.target.value)||0;
+        saveLocked();
+      };
+
+      root.querySelectorAll('.lockWeekBudget').forEach(el=>{
+        el.onchange = e=>{
+          lockedTemplate.weekBudgets[Number(e.target.dataset.idx)] = Number(e.target.value)||0;
+          saveLocked();
+        };
+      });
+
+      root.querySelectorAll('.lockSnackName').forEach(el=>{
+        el.onchange = e=>{
+          lockedTemplate.snackPeople[Number(e.target.dataset.idx)].name = e.target.value;
+          saveLocked();
+        };
+      });
+      root.querySelectorAll('.lockSnackAmount').forEach(el=>{
+        el.onchange = e=>{
+          lockedTemplate.snackPeople[Number(e.target.dataset.idx)].weeklyAmount = Number(e.target.value)||0;
+          saveLocked(); render();
+        };
+      });
+      root.querySelectorAll('.lockSnackDel').forEach(el=>{
+        el.onclick = e=>{
+          lockedTemplate.snackPeople.splice(Number(e.currentTarget.dataset.idx),1);
+          saveLocked(); render();
+        };
+      });
+      const lockAddSnack = root.querySelector('#lockAddSnack');
+      if(lockAddSnack) lockAddSnack.onclick = ()=>{
+        const nameEl = root.querySelector('#lockNewSnackName');
+        const amtEl = root.querySelector('#lockNewSnackAmount');
+        const name = nameEl.value.trim();
+        if(!name) return;
+        lockedTemplate.snackPeople.push({name, weeklyAmount:Number(amtEl.value)||0});
+        saveLocked(); render();
+      };
+
+      const applyLockNow = root.querySelector('#applyLockNow');
+      if(applyLockNow) applyLockNow.onclick = ()=>{
+        if(!confirm('ใช้เทมเพลตนี้แทนที่ข้อมูลเดือนที่เปิดอยู่ตอนนี้ทั้งหมด (Fix cost / งบเดือน / งบรายสัปดาห์ / คนที่ให้ค่าขนมประจำ) ต้องการดำเนินการต่อหรือไม่?')) return;
+        data = defaultData();
+        snackData = defaultSnack();
+        saveData(); saveSnack();
+        drawerOpen = false;
+        render();
+      };
+    }
+
+    root.querySelectorAll('.tab-btn').forEach(el=>{
+      el.onclick = ()=>{
+        const view = el.dataset.view;
+        if(view===currentView) return;
+        currentView = view;
+        render();
+      };
+    });
+
+    root.querySelectorAll('.ov-card').forEach(el=>{
+      el.onclick = ()=>{
+        currentView = el.dataset.view;
+        render();
+      };
+    });
+
+    const prevM = root.querySelector('#prevM');
+    const nextM = root.querySelector('#nextM');
+    if(prevM) prevM.onclick = ()=>changeMonth(-1);
+    if(nextM) nextM.onclick = ()=>changeMonth(1);
+
+    if(currentView==='expense'){
+      root.querySelectorAll('.lowstock-add').forEach(el=>{
+        el.onclick = e=>{
+          const r = stockRows.find(r=>r.id===e.currentTarget.dataset.id);
+          if(!r) return;
+          data.items.push({id:uid(), name:`${r.name} (ใกล้หมดแล้ว)`, amount:0, status:''});
+          saveData(); render();
+        };
+      });
+
+      root.querySelectorAll('.fixedName').forEach(el=>{
+        el.onchange = e=>{
+          const item = data.fixedItems.find(i=>i.id===e.target.dataset.id);
+          if(item){ item.name = e.target.value; saveData(); }
+        };
+      });
+      root.querySelectorAll('.fixedAmount').forEach(el=>{
+        el.onchange = e=>{
+          const item = data.fixedItems.find(i=>i.id===e.target.dataset.id);
+          if(item){ item.amount = Number(e.target.value)||0; saveData(); render(); }
+        };
+      });
+      root.querySelectorAll('.fixedStatus').forEach(el=>{
+        el.onchange = e=>{
+          const item = data.fixedItems.find(i=>i.id===e.target.dataset.id);
+          if(item){ item.status = e.target.value; saveData(); }
+        };
+      });
+      root.querySelectorAll('#fixedList .del-btn').forEach(el=>{
+        el.onclick = e=>{
+          data.fixedItems = data.fixedItems.filter(i=>i.id!==e.currentTarget.dataset.id);
+          saveData(); render();
+        };
+      });
+      const addFixed = root.querySelector('#addFixed');
+      if(addFixed) addFixed.onclick = ()=>{
+        const nameEl = root.querySelector('#newFixedName');
+        const amtEl = root.querySelector('#newFixedAmount');
+        const stEl = root.querySelector('#newFixedStatus');
+        const name = nameEl.value.trim();
+        if(!name) return;
+        data.fixedItems.push({id:uid(), name, amount:Number(amtEl.value)||0, status: stEl.value.trim()});
+        saveData(); render();
+      };
+
+      root.querySelectorAll('.itemName').forEach(el=>{
+        el.onchange = e=>{
+          const item = data.items.find(i=>i.id===e.target.dataset.id);
+          if(item){ item.name = e.target.value; saveData(); }
+        };
+      });
+      root.querySelectorAll('.itemAmount').forEach(el=>{
+        el.onchange = e=>{
+          const item = data.items.find(i=>i.id===e.target.dataset.id);
+          if(item){ item.amount = Number(e.target.value)||0; saveData(); render(); }
+        };
+      });
+      root.querySelectorAll('.itemStatus').forEach(el=>{
+        el.onchange = e=>{
+          const item = data.items.find(i=>i.id===e.target.dataset.id);
+          if(item){ item.status = e.target.value; saveData(); }
+        };
+      });
+      root.querySelectorAll('#itemList .del-btn').forEach(el=>{
+        el.onclick = e=>{
+          data.items = data.items.filter(i=>i.id!==e.currentTarget.dataset.id);
+          saveData(); render();
+        };
+      });
+      const addItem = root.querySelector('#addItem');
+      if(addItem) addItem.onclick = ()=>{
+        const nameEl = root.querySelector('#newItemName');
+        const amtEl = root.querySelector('#newItemAmount');
+        const stEl = root.querySelector('#newItemStatus');
+        const name = nameEl.value.trim();
+        if(!name) return;
+        data.items.push({id:uid(), name, amount:Number(amtEl.value)||0, status: stEl.value.trim()});
+        saveData(); render();
+      };
+
+      const monthlyBudgetInput = root.querySelector('#monthlyBudgetInput');
+      if(monthlyBudgetInput) monthlyBudgetInput.onchange = e=>{
+        data.monthlyBudget = Number(e.target.value)||0;
+        saveData(); render();
+      };
+
+      root.querySelectorAll('.wBudget').forEach(el=>{
+        el.onchange = e=>{
+          const w = data.weeks.find(w=>w.id===e.target.dataset.wid);
+          if(w){ w.budget = Number(e.target.value)||0; saveData(); render(); }
+        };
+      });
+      root.querySelectorAll('.wItemName').forEach(el=>{
+        el.onchange = e=>{
+          const w = data.weeks.find(w=>w.id===e.target.dataset.wid);
+          const it = w && w.items.find(i=>i.id===e.target.dataset.id);
+          if(it){ it.name = e.target.value; saveData(); }
+        };
+      });
+      root.querySelectorAll('.wItemAmount').forEach(el=>{
+        el.onchange = e=>{
+          const w = data.weeks.find(w=>w.id===e.target.dataset.wid);
+          const it = w && w.items.find(i=>i.id===e.target.dataset.id);
+          if(it){ it.amount = Number(e.target.value)||0; saveData(); render(); }
+        };
+      });
+      root.querySelectorAll('.week-item-row .del-btn').forEach(el=>{
+        el.onclick = e=>{
+          const w = data.weeks.find(w=>w.id===e.currentTarget.dataset.wid);
+          if(w){ w.items = w.items.filter(i=>i.id!==e.currentTarget.dataset.id); saveData(); render(); }
+        };
+      });
+      root.querySelectorAll('.wAddBtn').forEach(el=>{
+        el.onclick = e=>{
+          const wid = e.currentTarget.dataset.wid;
+          const w = data.weeks.find(w=>w.id===wid);
+          const card = e.currentTarget.closest('.week-card');
+          const nameEl = card.querySelector('.wNewName');
+          const amtEl = card.querySelector('.wNewAmount');
+          const name = nameEl.value.trim();
+          if(!name || !w) return;
+          w.items.push({id:uid(), name, amount:Number(amtEl.value)||0});
+          saveData(); render();
+        };
+      });
+
+      const resetMonth = root.querySelector('#resetMonth');
+      if(resetMonth) resetMonth.onclick = ()=>{
+        if(confirm('ล้างข้อมูลรายจ่ายของเดือนนี้ทั้งหมด?')){
+          data = defaultData();
+          saveData(); render();
+        }
+      };
+    }
+
+    if(currentView==='debt'){
+      root.querySelectorAll('.debtName').forEach(el=>{
+        el.onchange = e=>{
+          const d = debtRows.find(r=>r.id===e.target.dataset.did);
+          if(d){ d.label = e.target.value; saveDebts(); }
+        };
+      });
+      root.querySelectorAll('.debtTotal').forEach(el=>{
+        el.onchange = e=>{
+          const d = debtRows.find(r=>r.id===e.target.dataset.did);
+          if(d){ d.total = Number(e.target.value)||0; saveDebts(); render(); }
+        };
+      });
+      root.querySelectorAll('.debtDel').forEach(el=>{
+        el.onclick = e=>{
+          debtRows = debtRows.filter(r=>r.id!==e.currentTarget.dataset.did);
+          saveDebts(); render();
+        };
+      });
+      const addDebtRow = root.querySelector('#addDebtRow');
+      if(addDebtRow) addDebtRow.onclick = ()=>{
+        debtRows.push(defaultDebtRow());
+        saveDebts(); render();
+      };
+
+      root.querySelectorAll('.dpMonth').forEach(el=>{
+        el.onchange = e=>{
+          const d = debtRows.find(r=>r.id===e.target.dataset.did);
+          const p = d && d.payments.find(p=>p.id===e.target.dataset.id);
+          if(p){ p.month = e.target.value; saveDebts(); }
+        };
+      });
+      root.querySelectorAll('.dpAmount').forEach(el=>{
+        el.onchange = e=>{
+          const d = debtRows.find(r=>r.id===e.target.dataset.did);
+          const p = d && d.payments.find(p=>p.id===e.target.dataset.id);
+          if(p){ p.amount = Number(e.target.value)||0; saveDebts(); render(); }
+        };
+      });
+      root.querySelectorAll('.dpDel').forEach(el=>{
+        el.onclick = e=>{
+          const d = debtRows.find(r=>r.id===e.currentTarget.dataset.did);
+          if(d){ d.payments = d.payments.filter(p=>p.id!==e.currentTarget.dataset.id); saveDebts(); render(); }
+        };
+      });
+      root.querySelectorAll('.dpAddBtn').forEach(el=>{
+        el.onclick = e=>{
+          const did = e.currentTarget.dataset.did;
+          const d = debtRows.find(r=>r.id===did);
+          const card = e.currentTarget.closest('.week-card');
+          const monthEl = card.querySelector('.dpNewMonth');
+          const amtEl = card.querySelector('.dpNewAmount');
+          const month = monthEl.value.trim();
+          if(!d) return;
+          d.payments.push({id:uid(), month, amount:Number(amtEl.value)||0});
+          saveDebts(); render();
+        };
+      });
+    }
+
+    if(currentView==='rent'){
+      root.querySelectorAll('.rentField').forEach(el=>{
+        el.onchange = e=>{
+          const row = rentRows.find(r=>r.id===e.target.dataset.id);
+          if(!row) return;
+          const f = e.target.dataset.f;
+          row[f] = (e.target.type==='number') ? (Number(e.target.value)||0) : e.target.value;
+          saveRent(); render();
+        };
+      });
+      root.querySelectorAll('#rentBody .rdel').forEach(el=>{
+        el.onclick = e=>{
+          rentRows = rentRows.filter(r=>r.id!==e.currentTarget.dataset.id);
+          saveRent(); render();
+        };
+      });
+      const addRentRow = root.querySelector('#addRentRow');
+      if(addRentRow) addRentRow.onclick = ()=>{
+        rentRows.push(defaultRentRow());
+        saveRent(); render();
+      };
+    }
+
+    if(currentView==='snack'){
+      root.querySelectorAll('.personName').forEach(el=>{
+        el.onchange = e=>{
+          const p = snackData.people.find(p=>p.id===e.target.dataset.pid);
+          if(p){ p.name = e.target.value; saveSnack(); }
+        };
+      });
+      root.querySelectorAll('.personDel').forEach(el=>{
+        el.onclick = e=>{
+          snackData.people = snackData.people.filter(p=>p.id!==e.currentTarget.dataset.pid);
+          saveSnack(); render();
+        };
+      });
+      const addSnackPerson = root.querySelector('#addSnackPerson');
+      if(addSnackPerson) addSnackPerson.onclick = ()=>{
+        snackData.people.push(defaultSnackPerson());
+        saveSnack(); render();
+      };
+
+      root.querySelectorAll('.swLabel').forEach(el=>{
+        el.onchange = e=>{
+          const p = snackData.people.find(p=>p.id===e.target.dataset.pid);
+          const w = p && p.weeks.find(w=>w.id===e.target.dataset.id);
+          if(w){ w.label = e.target.value; saveSnack(); }
+        };
+      });
+      root.querySelectorAll('.swAmount').forEach(el=>{
+        el.onchange = e=>{
+          const p = snackData.people.find(p=>p.id===e.target.dataset.pid);
+          const w = p && p.weeks.find(w=>w.id===e.target.dataset.id);
+          if(w){ w.amount = Number(e.target.value)||0; saveSnack(); render(); }
+        };
+      });
+      root.querySelectorAll('.given-toggle').forEach(el=>{
+        el.onclick = e=>{
+          const p = snackData.people.find(p=>p.id===e.currentTarget.dataset.pid);
+          const w = p && p.weeks.find(w=>w.id===e.currentTarget.dataset.id);
+          if(w){ w.given = !w.given; saveSnack(); render(); }
+        };
+      });
+
+      root.querySelectorAll('.otherName').forEach(el=>{
+        el.onchange = e=>{
+          const item = snackData.others.find(i=>i.id===e.target.dataset.id);
+          if(item){ item.name = e.target.value; saveSnack(); }
+        };
+      });
+      root.querySelectorAll('.otherAmount').forEach(el=>{
+        el.onchange = e=>{
+          const item = snackData.others.find(i=>i.id===e.target.dataset.id);
+          if(item){ item.amount = Number(e.target.value)||0; saveSnack(); render(); }
+        };
+      });
+      root.querySelectorAll('.otherStatus').forEach(el=>{
+        el.onchange = e=>{
+          const item = snackData.others.find(i=>i.id===e.target.dataset.id);
+          if(item){ item.status = e.target.value; saveSnack(); }
+        };
+      });
+      root.querySelectorAll('.otherDel').forEach(el=>{
+        el.onclick = e=>{
+          snackData.others = snackData.others.filter(i=>i.id!==e.currentTarget.dataset.id);
+          saveSnack(); render();
+        };
+      });
+      const addOther = root.querySelector('#addOther');
+      if(addOther) addOther.onclick = ()=>{
+        const nameEl = root.querySelector('#newOtherName');
+        const amtEl = root.querySelector('#newOtherAmount');
+        const stEl = root.querySelector('#newOtherStatus');
+        const name = nameEl.value.trim();
+        if(!name) return;
+        snackData.others.push({id:uid(), name, amount:Number(amtEl.value)||0, status: stEl.value.trim()});
+        saveSnack(); render();
+      };
+    }
+  }
+
+  async function init(){
+    loadTheme();
+    loadTabConfig();
+    await Promise.all([loadRent(), loadDebts(), loadLocked(), loadStock()]);
+    loadMonth();
+  }
+  init();
+})();
+</script>
+</body>
+</html>
